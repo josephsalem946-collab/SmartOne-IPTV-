@@ -1,0 +1,6 @@
+{
+  "name": "SmartOne IPTV",
+  "description": "High-Quality Global IPTV Streaming with live channels, categories, subscription plans, and secure wallet payments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
