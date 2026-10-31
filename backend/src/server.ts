@@ -6,6 +6,7 @@ import { globalLimiter } from "./middlewares/rateLimiter";
 import { paymentRouter } from "./routes/payment.routes";
 import { nowPaymentsRouter } from "./routes/nowpayments.routes";
 import { stripeRouter } from "./routes/stripe.routes";
+import { app2Router } from "./routes/app2.routes";
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/payment", paymentRouter);
 app.use("/api/payment/nowpayments", nowPaymentsRouter);
 app.use("/api/v1/payments/nowpayments", nowPaymentsRouter);
+app.use("/api/app2", app2Router);
 app.use("/api/stripe", stripeRouter);
 
 // 7. Centralized Error Handling (No stack traces leaked to clients)

@@ -104,16 +104,14 @@ fun CryptoCheckoutDialog(
                     ) {
                         Surface(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            color = Color(0xFF181A20)
+                                .size(38.dp)
+                                .clip(CircleShape),
+                            color = Color.Transparent
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_crypto_logo),
-                                contentDescription = "Logo Crypto",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(2.dp),
+                                contentDescription = "Logo Crypto TRON (TRX / USDT TRC20)",
+                                modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Fit
                             )
                         }

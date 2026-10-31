@@ -46,6 +46,7 @@ fun HomeScreen(
     onSelectCategory: (String) -> Unit,
     onClearSearch: () -> Unit,
     onOpenPlans: () -> Unit,
+    isImmersiveMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -68,53 +69,55 @@ fun HomeScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = if (isImmersiveMode) 0.dp else 10.dp),
+            verticalArrangement = Arrangement.spacedBy(if (isImmersiveMode) 0.dp else 12.dp)
         ) {
-            // Free Timer / VIP Banner
-            item {
-                FreeTimerBanner(
-                    activeSubscription = activeSubscription,
-                    freeSecondsLeft = freeSecondsLeft,
-                    onOpenPlans = onOpenPlans
-                )
-            }
+            if (!isImmersiveMode) {
+                // Free Timer / VIP Banner
+                item {
+                    FreeTimerBanner(
+                        activeSubscription = activeSubscription,
+                        freeSecondsLeft = freeSecondsLeft,
+                        onOpenPlans = onOpenPlans
+                    )
+                }
 
-            // Official SmartOne IPTV Brand Strip
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    Color(0xFF0F172A),
-                                    Color(0xFF0B1120)
+                // Official SmartOne IPTV Brand Strip
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color(0xFF0F172A),
+                                        Color(0xFF0B1120)
+                                    )
                                 )
                             )
-                        )
-                        .border(1.dp, BrandCyan.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SmartOneBrandLogo(size = SmartOneLogoSize.MEDIUM, showSubtitle = true)
-
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = LogoCopperGold.copy(alpha = 0.15f),
-                        border = CardDefaults.outlinedCardBorder().copy(
-                            brush = androidx.compose.ui.graphics.SolidColor(LogoCopperGold)
-                        )
+                            .border(1.dp, BrandCyan.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "4K • 60fps",
-                            color = LogoCopperGold,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                        )
+                        SmartOneBrandLogo(size = SmartOneLogoSize.MEDIUM, showSubtitle = true)
+
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = LogoCopperGold.copy(alpha = 0.15f),
+                            border = CardDefaults.outlinedCardBorder().copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(LogoCopperGold)
+                            )
+                        ) {
+                            Text(
+                                text = "4K • 60fps",
+                                color = LogoCopperGold,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -134,136 +137,149 @@ fun HomeScreen(
                 )
             }
 
-            // Search filter badge if query active
-            if (searchQuery.isNotBlank()) {
+            if (!isImmersiveMode) {
+                // Interactive Promotional Banner Carousel (USDT TRC20, Recharge, Support)
+                item {
+                    InteractivePromoBanner(
+                        onNavigateToDeposit = onOpenPlans
+                    )
+                }
+            }
+
+            if (!isImmersiveMode) {
+                // Search filter badge if query active
+                if (searchQuery.isNotBlank()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(DarkSurfaceVariant)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Recherche : \"$searchQuery\"",
+                                color = BrandCyan,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            IconButton(onClick = onClearSearch, modifier = Modifier.size(24.dp)) {
+                                Icon(imageVector = Icons.Default.Close, contentDescription = "Effacer", tint = DarkTextSecondary)
+                            }
+                        }
+                    }
+                }
+
+                // Category Horizontal Chips Filter
+                item {
+                    val scrollState = rememberScrollState()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(scrollState),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        for (cat in SmartOneRepository.categories) {
+                            val isSelected = cat == selectedCategory
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { onSelectCategory(cat) },
+                                label = { Text(cat, fontSize = 13.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = DarkSurface,
+                                    labelColor = DarkTextSecondary,
+                                    selectedContainerColor = BrandBluePrimary,
+                                    selectedLabelColor = Color.White
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    enabled = true,
+                                    selected = isSelected,
+                                    borderColor = if (isSelected) BrandCyan else DarkBorder
+                                ),
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.testTag("cat_chip_$cat")
+                            )
+                        }
+                    }
+                }
+
+                // Channels Section Header
                 item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(DarkSurfaceVariant)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(top = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Recherche : \"$searchQuery\"",
-                            color = BrandCyan,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
+                            text = if (selectedCategory == "Toutes") "Toutes les chaînes" else selectedCategory,
+                            color = DarkTextPrimary,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        IconButton(onClick = onClearSearch, modifier = Modifier.size(24.dp)) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = "Effacer", tint = DarkTextSecondary)
-                        }
-                    }
-                }
-            }
-
-            // Category Horizontal Chips Filter
-            item {
-                val scrollState = rememberScrollState()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(scrollState),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    for (cat in SmartOneRepository.categories) {
-                        val isSelected = cat == selectedCategory
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { onSelectCategory(cat) },
-                            label = { Text(cat, fontSize = 13.sp) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                containerColor = DarkSurface,
-                                labelColor = DarkTextSecondary,
-                                selectedContainerColor = BrandBluePrimary,
-                                selectedLabelColor = Color.White
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                enabled = true,
-                                selected = isSelected,
-                                borderColor = if (isSelected) BrandCyan else DarkBorder
-                            ),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.testTag("cat_chip_$cat")
+                        Text(
+                            text = "${filteredChannels.size} disponible(s)",
+                            color = DarkTextMuted,
+                            fontSize = 12.sp
                         )
                     }
                 }
-            }
 
-            // Channels Section Header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (selectedCategory == "Toutes") "Toutes les chaînes" else selectedCategory,
-                        color = DarkTextPrimary,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${filteredChannels.size} disponible(s)",
-                        color = DarkTextMuted,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-
-            // Channels List
-            if (filteredChannels.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        colors = CardDefaults.cardColors(containerColor = DarkSurface)
-                    ) {
-                        Column(
+                // Channels List
+                if (filteredChannels.isEmpty()) {
+                    item {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(vertical = 24.dp),
+                            colors = CardDefaults.cardColors(containerColor = DarkSurface)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.SearchOff,
-                                contentDescription = null,
-                                tint = DarkTextMuted,
-                                modifier = Modifier.size(40.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Aucune chaîne trouvée dans cette catégorie",
-                                color = DarkTextSecondary,
-                                fontSize = 14.sp
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SearchOff,
+                                    contentDescription = null,
+                                    tint = DarkTextMuted,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Aucune chaîne trouvée dans cette catégorie",
+                                    color = DarkTextSecondary,
+                                    fontSize = 14.sp
+                                )
+                            }
                         }
                     }
-                }
-            } else {
-                items(filteredChannels, key = { it.id }) { channel ->
-                    ChannelCard(
-                        channel = channel,
-                        isCurrentlyPlaying = currentPlaying?.id == channel.id && isPlaying,
-                        isFavorite = favorites.contains(channel.id),
-                        onSelect = { onSelectChannel(channel) },
-                        onToggleFavorite = { onToggleFavorite(channel.id) }
-                    )
+                } else {
+                    items(filteredChannels, key = { it.id }) { channel ->
+                        ChannelCard(
+                            channel = channel,
+                            isCurrentlyPlaying = currentPlaying?.id == channel.id && isPlaying,
+                            isFavorite = favorites.contains(channel.id),
+                            onSelect = { onSelectChannel(channel) },
+                            onToggleFavorite = { onToggleFavorite(channel.id) }
+                        )
+                    }
                 }
             }
         }
 
         // Auto-hiding quick scroll to top button
-        QuickScrollButton(
-            listState = listState,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        )
+        if (!isImmersiveMode) {
+            QuickScrollButton(
+                listState = listState,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            )
+        }
     }
 }

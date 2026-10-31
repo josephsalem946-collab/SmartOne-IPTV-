@@ -1,5 +1,6 @@
 package com.example.data.network
 
+import com.example.BuildConfig
 import com.example.data.payment.CreatePaymentResponse
 import com.example.data.payment.PaymentGatewayType
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,9 @@ import java.util.concurrent.TimeUnit
  * - Zero sensitive keys exposed in the mobile app
  */
 class SecurePaymentProxyClient(
-    private val backendBaseUrl: String = "https://api.smartone-iptv.com"
+    private val backendBaseUrl: String = BuildConfig.PAYMENT_BACKEND_URL.ifEmpty {
+        "https://ais-pre-l4o5dpw7ksufk2mxdx3l76-856675755931.us-east1.run.app"
+    }
 ) {
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)

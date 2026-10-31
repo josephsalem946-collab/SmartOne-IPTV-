@@ -40,6 +40,7 @@ fun AppDrawer(
     onOpenFaq: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenFeedback: () -> Unit,
+    onOpenNotifications: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(
@@ -120,8 +121,19 @@ fun AppDrawer(
 
             // Main Navigation Items
             item {
+                val notifications by SmartOneRepository.notifications.collectAsStateWithLifecycle()
+
                 DrawerNavItem("home", "Toutes les chaînes", Icons.Default.Tv, selectedNav == "home") { onNavigate("home") }
                 DrawerNavItem("fav", "Favoris", Icons.Default.Star, selectedNav == "fav") { onNavigate("fav") }
+                DrawerNavItem(
+                    id = "notifications",
+                    label = "Notifications",
+                    icon = Icons.Default.Notifications,
+                    selected = false,
+                    badge = if (notifications.isNotEmpty()) "${notifications.size}" else null
+                ) {
+                    onOpenNotifications()
+                }
                 DrawerNavItem("plans", "Abonnements", Icons.Default.CreditCard, selectedNav == "plans") { onNavigate("plans") }
                 DrawerNavItem("deposit", "Dépôt (Wallet)", Icons.Default.AccountBalanceWallet, selectedNav == "deposit") { onNavigate("deposit") }
                 DrawerNavItem("history", "Historique", Icons.AutoMirrored.Filled.ReceiptLong, selectedNav == "history") { onNavigate("history") }
@@ -316,11 +328,29 @@ fun DrawerNavItem(
     label: String,
     icon: ImageVector,
     selected: Boolean,
+    badge: String? = null,
     onClick: () -> Unit
 ) {
     NavigationDrawerItem(
         icon = { Icon(imageVector = icon, contentDescription = null, tint = if (selected) BrandCyan else DarkTextSecondary) },
         label = { Text(label, fontSize = 14.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+        badge = badge?.let {
+            {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = BrandGold,
+                    modifier = Modifier.padding(end = 4.dp)
+                ) {
+                    Text(
+                        text = it,
+                        color = Color.Black,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+        },
         selected = selected,
         onClick = onClick,
         modifier = Modifier

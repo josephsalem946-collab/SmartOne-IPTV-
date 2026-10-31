@@ -31,10 +31,10 @@ val LogoCopperGold = Color(0xFFE0A96D)   // "IPTV" 3D extruded metallic copper-g
 val LogoStarGlow = Color(0xFFFBBF24)     // Celestial gold star
 
 enum class SmartOneLogoSize(val iconSize: Dp, val fontSize: TextUnit, val spacing: Dp) {
-    HEADER_COMPACT(20.dp, 12.sp, 5.dp),
+    HEADER_COMPACT(28.dp, 17.sp, 8.dp),
     SMALL(22.dp, 13.sp, 5.dp),
-    MEDIUM(26.dp, 15.sp, 6.dp),
-    LARGE(40.dp, 19.sp, 8.dp)
+    MEDIUM(30.dp, 18.sp, 8.dp),
+    LARGE(44.dp, 22.sp, 10.dp)
 }
 
 /**

@@ -24,6 +24,12 @@ const envSchema = z.object({
   NOWPAYMENTS_IPN_SECRET: z.string().min(10).default("hKiNfKED5A2JTxpwa1oR35Lp2XRzl9Ez"),
   NOWPAYMENTS_API_URL: z.string().url().default("https://api.nowpayments.io/v1"),
 
+  // App2 (SmartOne IPTV) Dedicated Credentials
+  APP2_NOWPAYMENTS_API_KEY: z.string().default(process.env.APP2_NOWPAYMENTS_API_KEY || process.env.NOWPAYMENTS_API_KEY || "6EZ44P4-K52MBVT-QQ56MRX-WZWM8J5"),
+  APP2_NOWPAYMENTS_IPN_SECRET: z.string().default(process.env.APP2_NOWPAYMENTS_IPN_SECRET || process.env.NOWPAYMENTS_IPN_SECRET || "hKiNfKED5A2JTxpwa1oR35Lp2XRzl9Ez"),
+  APP2_NOWPAYMENTS_BASE_URL: z.string().default(process.env.APP2_NOWPAYMENTS_BASE_URL || "https://api.nowpayments.io/v1"),
+  APP2_BASE_URL: z.string().default(process.env.APP2_BASE_URL || "https://smartone-iptv.com"),
+
   // Stripe Official Credentials
   STRIPE_SECRET_KEY: z.string().min(10).default("sk_test_smartone_default_secret"),
   STRIPE_PUBLISHABLE_KEY: z.string().min(10).default("pk_test_smartone_default_pub"),

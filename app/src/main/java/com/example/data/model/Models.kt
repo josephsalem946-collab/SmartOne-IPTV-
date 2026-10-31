@@ -113,3 +113,14 @@ data class UserComment(
     val date: String,
     val badge: String = "Client Vérifié"
 )
+
+data class AppNotification(
+    val id: String,
+    val title: String,
+    val message: String,
+    val date: String,
+    val type: String = "INFO", // "INFO", "PROMO", "SYSTEM", "ALERT"
+    val isRead: Boolean = false,
+    val sender: String = "Administrateur"
+)
+

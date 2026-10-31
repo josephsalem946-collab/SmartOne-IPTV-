@@ -258,8 +258,8 @@ object PaymentBackendService {
      */
     fun createNowPaymentsCryptoPayment(userId: String, amountUsd: Double, payCurrency: String = "usdttrc20"): CreatePaymentResponse {
         val apiKey = BuildConfig.NOWPAYMENTS_API_KEY
-        // Generate orderId with APP2_ prefix for SmartOne IPTV
-        val orderId = "APP2_${System.currentTimeMillis() / 1000}_${(1000..9999).random()}"
+        // Generate orderId with APP2-IPTV-[TIMESTAMP]-[USER_ID] format for SmartOne IPTV
+        val orderId = "APP2-IPTV-${System.currentTimeMillis()}-${userId}"
         val amountHtg = amountUsd * SmartOneRepository.USD_RATE
         val checkoutUrl = "https://nowpayments.io/payment/?iid=$orderId"
 

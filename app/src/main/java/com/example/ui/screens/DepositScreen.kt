@@ -293,6 +293,11 @@ fun DepositScreen(
             }
         }
 
+        // Interactive Promotional & Warning Banner Carousel
+        item {
+            InteractivePromoBanner()
+        }
+
         // Amount Selection & Preset Chips
         item {
             Card(
@@ -733,16 +738,14 @@ fun DepositScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            color = if (isCryptoBlocked) DarkBorder else Color(0xFF181A20)
+                                .size(38.dp)
+                                .clip(CircleShape),
+                            color = if (isCryptoBlocked) DarkBorder else Color.Transparent
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_crypto_logo),
-                                contentDescription = "Logo Crypto",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(2.dp),
+                                contentDescription = "Logo Crypto TRON (TRX / USDT TRC20)",
+                                modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Fit
                             )
                         }
@@ -763,7 +766,7 @@ fun DepositScreen(
                                 }
                             }
                             Text(
-                                text = if (isCryptoBlocked) "Passerelle temporairement désactivée" else "USDT, Bitcoin, Ethereum, TRX",
+                                text = if (isCryptoBlocked) "Passerelle temporairement désactivée" else "USDT (TRC20), Tron, Bitcoin, Crypto",
                                 color = if (isCryptoBlocked) StatusRed else Color.White.copy(alpha = 0.85f),
                                 fontSize = 11.sp
                             )

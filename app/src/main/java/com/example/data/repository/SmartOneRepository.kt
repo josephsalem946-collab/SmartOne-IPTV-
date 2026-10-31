@@ -570,4 +570,56 @@ object SmartOneRepository {
     fun setLanguage(lang: String) {
         _selectedLanguage.value = lang
     }
+
+    // --- Notifications Management (Client View & Admin Broadcast) ---
+    private val _notifications = MutableStateFlow<List<AppNotification>>(
+        listOf(
+            AppNotification(
+                id = "notif_welcome",
+                title = "Bienvenue sur SmartOne IPTV ! 🌐",
+                message = "Profitez de votre heure gratuite quotidienne en 4K UHD. Activez votre abonnement VIP pour un streaming illimité.",
+                date = "Aujourd'hui",
+                type = "INFO"
+            ),
+            AppNotification(
+                id = "notif_promo_moncash",
+                title = "Recharge MonCash & NatCash Active ⚡",
+                message = "Les dépôts en direct via MonCash et NatCash sont disponibles 24/7 avec confirmation instantanée.",
+                date = "Hier",
+                type = "PROMO"
+            ),
+            AppNotification(
+                id = "notif_security",
+                title = "Alerte de Sécurité USDT TRC20 ⚠️",
+                message = "Pour les dépôts Crypto, utilisez exclusivement le réseau TRC20 pour éviter toute perte irréversible.",
+                date = "Il y a 2 jours",
+                type = "ALERT"
+            )
+        )
+    )
+    val notifications: StateFlow<List<AppNotification>> = _notifications.asStateFlow()
+
+    fun sendNotification(title: String, message: String, type: String = "INFO"): Boolean {
+        if (title.isBlank() || message.isBlank()) return false
+        val dateFormat = SimpleDateFormat("dd MMM HH:mm", Locale.FRENCH)
+        val newNotif = AppNotification(
+            id = "notif_${System.currentTimeMillis()}",
+            title = title.trim(),
+            message = message.trim(),
+            date = dateFormat.format(Date()),
+            type = type,
+            isRead = false,
+            sender = "Administrateur (josephsalem946@gmail.com)"
+        )
+        _notifications.value = listOf(newNotif) + _notifications.value
+        return true
+    }
+
+    fun deleteNotification(notificationId: String) {
+        _notifications.value = _notifications.value.filterNot { it.id == notificationId }
+    }
+
+    fun clearAllNotifications() {
+        _notifications.value = emptyList()
+    }
 }

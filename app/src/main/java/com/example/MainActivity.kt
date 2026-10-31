@@ -82,6 +82,7 @@ fun SmartOneMainApp() {
     val selectedLanguage by SmartOneRepository.selectedLanguage.collectAsStateWithLifecycle()
     val paymentGateways by SmartOneRepository.paymentGateways.collectAsStateWithLifecycle()
     val thirdPartySubscriptions by SmartOneRepository.thirdPartySubscriptions.collectAsStateWithLifecycle()
+    val notifications by SmartOneRepository.notifications.collectAsStateWithLifecycle()
     val networkStatus by NetworkStatusMonitor.networkStatus.collectAsStateWithLifecycle()
 
     // Initialize Network and Offline Cache
@@ -112,15 +113,16 @@ fun SmartOneMainApp() {
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showFreeQuotaExpiredDialog by remember { mutableStateOf(false) }
     var showDownloadDialog by remember { mutableStateOf(false) }
+    var showNotificationsDialog by remember { mutableStateOf(false) }
 
-    // Bottom Navigation Bar Inactivity Auto-hide (1 minute = 60 seconds)
-    var isBottomBarVisible by remember { mutableStateOf(true) }
+    // Auto-hide UI upon 45 seconds of inactivity (Immersive media player mode)
+    var isUIVisible by remember { mutableStateOf(true) }
     var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-    // Inactivity countdown: hides bottom bar after 1 minute of no user action
+    // 45 seconds countdown timer for inactivity
     LaunchedEffect(lastInteractionTime) {
-        delay(60_000L)
-        isBottomBarVisible = false
+        delay(45_000L) // 45 segond san aksyon
+        isUIVisible = false
     }
 
     // 1-hour free daily countdown timer loop
@@ -187,6 +189,10 @@ fun SmartOneMainApp() {
                 onOpenFeedback = {
                     coroutineScope.launch { drawerState.close() }
                     showFeedbackDialog = true
+                },
+                onOpenNotifications = {
+                    coroutineScope.launch { drawerState.close() }
+                    showNotificationsDialog = true
                 }
             )
         }
@@ -200,98 +206,117 @@ fun SmartOneMainApp() {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
                             if (event.changes.isNotEmpty()) {
                                 lastInteractionTime = System.currentTimeMillis()
-                                if (!isBottomBarVisible) {
-                                    isBottomBarVisible = true
+                                if (!isUIVisible) {
+                                    isUIVisible = true
                                 }
                             }
                         }
                     }
                 },
             topBar = {
-                TopAppBar(
-                    title = {
-                        SmartOneBrandLogo(size = SmartOneLogoSize.HEADER_COMPACT)
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                lastInteractionTime = System.currentTimeMillis()
-                                isBottomBarVisible = true
-                                coroutineScope.launch { drawerState.open() }
-                            },
-                            modifier = Modifier.testTag("app_menu_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu Principal",
-                                tint = DarkTextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        // Random Channel action (🎲)
-                        IconButton(
-                            onClick = {
-                                lastInteractionTime = System.currentTimeMillis()
-                                isBottomBarVisible = true
-                                SmartOneRepository.playRandomChannel()
-                                currentScreen = "home"
-                                Toast.makeText(context, "🎲 Chaîne aléatoire lancée !", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.testTag("random_channel_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Casino,
-                                contentDescription = "Chaîne Aléatoire",
-                                tint = BrandGold
-                            )
-                        }
+                AnimatedVisibility(
+                    visible = isUIVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                ) {
+                    TopAppBar(
+                        modifier = Modifier.height(64.dp),
+                        title = {
+                            SmartOneBrandLogo(size = SmartOneLogoSize.HEADER_COMPACT)
+                        },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = {
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    isUIVisible = true
+                                    coroutineScope.launch { drawerState.open() }
+                                },
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .testTag("app_menu_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu Principal",
+                                    tint = DarkTextPrimary,
+                                    modifier = Modifier.size(26.dp)
+                                )
+                            }
+                        },
+                        actions = {
+                            // Random Channel action (🎲)
+                            IconButton(
+                                onClick = {
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    isUIVisible = true
+                                    SmartOneRepository.playRandomChannel()
+                                    currentScreen = "home"
+                                    Toast.makeText(context, "🎲 Chaîne aléatoire lancée !", Toast.LENGTH_SHORT).show()
+                                },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .testTag("random_channel_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Casino,
+                                    contentDescription = "Chaîne Aléatoire",
+                                    tint = BrandGold,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
 
-                        // Search action (🔍)
-                        IconButton(
-                            onClick = {
-                                lastInteractionTime = System.currentTimeMillis()
-                                isBottomBarVisible = true
-                                showSearchDialog = true
-                            },
-                            modifier = Modifier.testTag("app_search_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Rechercher",
-                                tint = DarkTextPrimary
-                            )
-                        }
+                            // Search action (🔍)
+                            IconButton(
+                                onClick = {
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    isUIVisible = true
+                                    showSearchDialog = true
+                                },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .testTag("app_search_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Rechercher",
+                                    tint = DarkTextPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
 
-                        // Profile / User action (👤)
-                        IconButton(
-                            onClick = {
-                                lastInteractionTime = System.currentTimeMillis()
-                                isBottomBarVisible = true
-                                if (currentUser != null) {
-                                    showProfileDialog = true
-                                } else {
-                                    showAuthDialog = true
-                                }
-                            },
-                            modifier = Modifier.testTag("app_user_button")
-                        ) {
-                            Icon(
-                                imageVector = if (currentUser != null) Icons.Default.AccountCircle else Icons.Default.PersonOutline,
-                                contentDescription = "Compte",
-                                tint = if (currentUser != null) BrandCyan else DarkTextPrimary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = DarkSurface,
-                        titleContentColor = DarkTextPrimary
+                            // Profile / User action (👤)
+                            IconButton(
+                                onClick = {
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    isUIVisible = true
+                                    if (currentUser != null) {
+                                        showProfileDialog = true
+                                    } else {
+                                        showAuthDialog = true
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .testTag("app_user_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (currentUser != null) Icons.Default.AccountCircle else Icons.Default.PersonOutline,
+                                    contentDescription = "Compte",
+                                    tint = if (currentUser != null) BrandCyan else DarkTextPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = DarkSurface,
+                            titleContentColor = DarkTextPrimary
+                        )
                     )
-                )
+                }
             },
             bottomBar = {
                 AnimatedVisibility(
-                    visible = isBottomBarVisible,
+                    visible = isUIVisible,
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
@@ -379,7 +404,7 @@ fun SmartOneMainApp() {
                     .padding(paddingValues)
             ) {
                 // 1. Offline Mode Banner
-                AnimatedVisibility(visible = !networkStatus.isConnected) {
+                AnimatedVisibility(visible = isUIVisible && !networkStatus.isConnected) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         color = StatusRed.copy(alpha = 0.95f)
@@ -415,7 +440,7 @@ fun SmartOneMainApp() {
                 }
 
                 // 2. Weak Internet / Low Bandwidth Banner
-                AnimatedVisibility(visible = networkStatus.isConnected && networkStatus.isWeak) {
+                AnimatedVisibility(visible = isUIVisible && networkStatus.isConnected && networkStatus.isWeak) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         color = Color(0xFFB45309) // Deep Warm Amber
@@ -470,7 +495,8 @@ fun SmartOneMainApp() {
                         onToggleFavorite = { channelId -> SmartOneRepository.toggleFavorite(channelId) },
                         onSelectCategory = { cat -> selectedCategory = cat },
                         onClearSearch = { searchQuery = "" },
-                        onOpenPlans = { currentScreen = "plans" }
+                        onOpenPlans = { currentScreen = "plans" },
+                        isImmersiveMode = !isUIVisible
                     )
 
                     "plans" -> PlansScreen(
@@ -575,6 +601,18 @@ fun SmartOneMainApp() {
                         onToggleClientPayForOthers = { clientId ->
                             SmartOneRepository.toggleClientPayForOthers(clientId)
                             Toast.makeText(context, "Aksè peye pou lòt kliyan modifye avèk siksè", Toast.LENGTH_SHORT).show()
+                        },
+                        notifications = notifications,
+                        onSendNotification = { title, message, type ->
+                            val sent = SmartOneRepository.sendNotification(title, message, type)
+                            if (sent) {
+                                Toast.makeText(context, "Notification diffusée à tous les clients !", Toast.LENGTH_SHORT).show()
+                            }
+                            sent
+                        },
+                        onDeleteNotification = { notifId ->
+                            SmartOneRepository.deleteNotification(notifId)
+                            Toast.makeText(context, "Notification supprimée avec succès", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -822,5 +860,21 @@ fun SmartOneMainApp() {
     // Download App Dialog
     if (showDownloadDialog) {
         DownloadAppDialog(onDismiss = { showDownloadDialog = false })
+    }
+
+    // Notifications Dialog for Client
+    if (showNotificationsDialog) {
+        NotificationsDialog(
+            notifications = notifications,
+            onDeleteNotification = { notifId ->
+                SmartOneRepository.deleteNotification(notifId)
+                Toast.makeText(context, "Notification supprimée", Toast.LENGTH_SHORT).show()
+            },
+            onClearAll = {
+                SmartOneRepository.clearAllNotifications()
+                Toast.makeText(context, "Toutes les notifications ont été supprimées", Toast.LENGTH_SHORT).show()
+            },
+            onDismiss = { showNotificationsDialog = false }
+        )
     }
 }
