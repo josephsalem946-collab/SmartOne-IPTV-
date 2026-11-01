@@ -186,33 +186,7 @@ fun AdminDashboardScreen(
 
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "Smart",
-                                    color = LogoSapphireBlue,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                                Text(
-                                    text = "One ",
-                                    color = LogoTealCyan,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 16.sp
-                                )
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = LogoCopperGold.copy(alpha = 0.18f),
-                                    border = CardDefaults.outlinedCardBorder().copy(
-                                        brush = androidx.compose.ui.graphics.SolidColor(LogoCopperGold)
-                                    )
-                                ) {
-                                    Text(
-                                        text = "IPTV",
-                                        color = LogoCopperGold,
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 12.sp,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                    )
-                                }
+                                SmartOneTriColorText(fontSize = 15.sp, showIptvBadge = true)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "• Admin",

@@ -914,12 +914,7 @@ fun DownloadAppDialog(
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column {
-                            Text(
-                                text = "SmartOne IPTV",
-                                color = DarkTextPrimary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
+                            SmartOneTriColorText(fontSize = 16.sp, showIptvBadge = true)
                             Text(
                                 text = "Version v${com.example.BuildConfig.VERSION_NAME} · Build ${com.example.BuildConfig.VERSION_CODE} (Dernière version)",
                                 color = BrandCyan,

@@ -16,8 +16,8 @@ android {
     applicationId = "com.aistudio.smartoneiptv.kxmp"
     minSdk = 24
     targetSdk = 36
-    versionCode = 17
-    versionName = "17.0"
+    versionCode = 19
+    versionName = "19.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

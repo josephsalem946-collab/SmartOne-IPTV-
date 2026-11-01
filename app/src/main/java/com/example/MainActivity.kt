@@ -220,9 +220,9 @@ fun SmartOneMainApp() {
                     exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
                 ) {
                     TopAppBar(
-                        modifier = Modifier.height(64.dp),
+                        modifier = Modifier.height(74.dp),
                         title = {
-                            SmartOneBrandLogo(size = SmartOneLogoSize.HEADER_COMPACT)
+                            SmartOneBrandLogo(size = SmartOneLogoSize.HEADER)
                         },
                         navigationIcon = {
                             IconButton(

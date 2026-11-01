@@ -54,17 +54,6 @@ fun AppDrawer(
                 .padding(vertical = 12.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            // Official Brand Logo Banner
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    SmartOneFullBrandCard(height = 135.dp)
-                }
-            }
-
             // Profile Card Header
             item {
                 Card(
@@ -298,13 +287,22 @@ fun AppDrawer(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
 
-                // Support footer
+            // Support & Version Footer
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
+                    Text(
+                        text = "SmartOne IPTV v${com.example.BuildConfig.VERSION_NAME}",
+                        color = DarkTextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Support Disponible",
                         color = DarkTextMuted,
@@ -318,9 +316,9 @@ fun AppDrawer(
                     )
                 }
             }
+            }
         }
     }
-}
 
 @Composable
 fun DrawerNavItem(
