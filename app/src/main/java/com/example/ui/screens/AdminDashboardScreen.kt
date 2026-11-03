@@ -742,9 +742,9 @@ fun AdminDashboardScreen(
                                     .testTag("admin_recipient_input"),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = BrandGold,
-                                    unfocusedBorderColor = DarkBorder,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    unfocusedBorderColor = LightBorder,
+                                    focusedTextColor = LightTextPrimary,
+                                    unfocusedTextColor = LightTextPrimary
                                 )
                             )
 
@@ -1341,10 +1341,10 @@ fun AdminDashboardScreen(
                                     .fillMaxWidth()
                                     .testTag("notif_title_input"),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = BrandCyan,
-                                    unfocusedBorderColor = DarkBorder,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = BrandBluePrimary,
+                                    unfocusedBorderColor = LightBorder,
+                                    focusedTextColor = LightTextPrimary,
+                                    unfocusedTextColor = LightTextPrimary
                                 )
                             )
 
@@ -1365,10 +1365,10 @@ fun AdminDashboardScreen(
                                     .fillMaxWidth()
                                     .testTag("notif_message_input"),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = BrandCyan,
-                                    unfocusedBorderColor = DarkBorder,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
+                                    focusedBorderColor = BrandBluePrimary,
+                                    unfocusedBorderColor = LightBorder,
+                                    focusedTextColor = LightTextPrimary,
+                                    unfocusedTextColor = LightTextPrimary
                                 )
                             )
 
@@ -1620,10 +1620,10 @@ fun AdminDashboardScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BrandCyan,
-                            unfocusedBorderColor = DarkBorder,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
+                            focusedBorderColor = BrandBluePrimary,
+                            unfocusedBorderColor = LightBorder,
+                            focusedTextColor = LightTextPrimary,
+                            unfocusedTextColor = LightTextPrimary
                         )
                     )
                 }

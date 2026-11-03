@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.intent.permission.INTERNET" />
     <uses-permission android:name="android.intent.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.intent.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.intent.permission.VIBRATE" />
+    <uses-permission android:name="android.intent.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"

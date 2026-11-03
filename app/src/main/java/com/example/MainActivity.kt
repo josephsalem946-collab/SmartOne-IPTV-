@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,7 +63,6 @@ class MainActivity : ComponentActivity() {
 fun SmartOneMainApp() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     // Repository states
     val channels by SmartOneRepository.channels.collectAsStateWithLifecycle()
@@ -114,6 +114,9 @@ fun SmartOneMainApp() {
     var showFreeQuotaExpiredDialog by remember { mutableStateOf(false) }
     var showDownloadDialog by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
+    var showVideoSettingsDialog by remember { mutableStateOf(false) }
+    val playerBrightness by SmartOneRepository.playerBrightness.collectAsStateWithLifecycle()
+    val playerContrast by SmartOneRepository.playerContrast.collectAsStateWithLifecycle()
 
     // Auto-hide UI upon 45 seconds of inactivity (Immersive media player mode)
     var isUIVisible by remember { mutableStateOf(true) }
@@ -143,175 +146,216 @@ fun SmartOneMainApp() {
         currentScreen = "home"
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            AppDrawer(
-                currentUser = currentUser,
-                selectedNav = currentScreen,
-                onNavigate = { route ->
-                    currentScreen = route
-                    coroutineScope.launch { drawerState.close() }
-                },
-                onSelectCategory = { cat ->
-                    selectedCategory = cat
-                    currentScreen = "home"
-                    coroutineScope.launch { drawerState.close() }
-                },
-                onOpenProfile = {
-                    coroutineScope.launch { drawerState.close() }
-                    if (currentUser != null) showProfileDialog = true else showAuthDialog = true
-                },
-                onOpenLanguagePicker = {
-                    coroutineScope.launch { drawerState.close() }
-                    showLanguageDialog = true
-                },
-                onOpenAdmin = {
-                    currentScreen = "admin"
-                    coroutineScope.launch { drawerState.close() }
-                },
-                onOpenAbout = {
-                    coroutineScope.launch { drawerState.close() }
-                    showAboutDialog = true
-                },
-                onOpenDownloadApp = {
-                    coroutineScope.launch { drawerState.close() }
-                    showDownloadDialog = true
-                },
-                onOpenFaq = {
-                    coroutineScope.launch { drawerState.close() }
-                    showFaqDialog = true
-                },
-                onOpenPrivacy = {
-                    coroutineScope.launch { drawerState.close() }
-                    showPrivacyDialog = true
-                },
-                onOpenFeedback = {
-                    coroutineScope.launch { drawerState.close() }
-                    showFeedbackDialog = true
-                },
-                onOpenNotifications = {
-                    coroutineScope.launch { drawerState.close() }
-                    showNotificationsDialog = true
-                }
-            )
-        }
-    ) {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                            if (event.changes.isNotEmpty()) {
-                                lastInteractionTime = System.currentTimeMillis()
-                                if (!isUIVisible) {
-                                    isUIVisible = true
-                                }
+    val currentAppBackground by androidx.compose.animation.animateColorAsState(
+        targetValue = if (!isUIVisible) ColorBleuMaronFonce else LightBackground,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 350),
+        label = "scaffold_inaction_bg"
+    )
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (event.changes.isNotEmpty()) {
+                            lastInteractionTime = System.currentTimeMillis()
+                            if (!isUIVisible) {
+                                isUIVisible = true
                             }
                         }
                     }
-                },
-            topBar = {
-                AnimatedVisibility(
-                    visible = isUIVisible,
-                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                }
+            }
+            .clickable(
+                enabled = !isUIVisible,
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null
+            ) {
+                lastInteractionTime = System.currentTimeMillis()
+                isUIVisible = true
+            },
+        topBar = {
+            AnimatedVisibility(
+                visible = isUIVisible,
+                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ColorBleuMaronFonce)
                 ) {
-                    TopAppBar(
-                        modifier = Modifier.height(74.dp),
-                        title = {
-                            SmartOneBrandLogo(size = SmartOneLogoSize.HEADER)
-                        },
-                        navigationIcon = {
-                            IconButton(
-                                onClick = {
-                                    lastInteractionTime = System.currentTimeMillis()
-                                    isUIVisible = true
-                                    coroutineScope.launch { drawerState.open() }
-                                },
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .testTag("app_menu_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu Principal",
-                                    tint = DarkTextPrimary,
-                                    modifier = Modifier.size(26.dp)
-                                )
-                            }
-                        },
-                        actions = {
-                            // Random Channel action (🎲)
-                            IconButton(
-                                onClick = {
-                                    lastInteractionTime = System.currentTimeMillis()
-                                    isUIVisible = true
-                                    SmartOneRepository.playRandomChannel()
-                                    currentScreen = "home"
-                                    Toast.makeText(context, "🎲 Chaîne aléatoire lancée !", Toast.LENGTH_SHORT).show()
-                                },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("random_channel_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Casino,
-                                    contentDescription = "Chaîne Aléatoire",
-                                    tint = BrandGold,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .height(64.dp),
+                        color = ColorBleuMaronFonce
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
 
-                            // Search action (🔍)
-                            IconButton(
-                                onClick = {
-                                    lastInteractionTime = System.currentTimeMillis()
-                                    isUIVisible = true
-                                    showSearchDialog = true
-                                },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("app_search_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Rechercher",
-                                    tint = DarkTextPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                                // 2. Center Branding (ONLY emblem icon, no text)
+                                Surface(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            lastInteractionTime = System.currentTimeMillis()
+                                            isUIVisible = true
+                                            currentScreen = "home"
+                                        },
+                                    shape = CircleShape,
+                                    color = Color.White,
+                                    shadowElevation = 3.dp,
+                                    border = androidx.compose.foundation.BorderStroke(1.2.dp, ColorONEGold)
+                                ) {
+                                    androidx.compose.foundation.Image(
+                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
+                                        contentDescription = "SmartOne Emblem",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                    )
+                                }
 
-                            // Profile / User action (👤)
-                            IconButton(
-                                onClick = {
-                                    lastInteractionTime = System.currentTimeMillis()
-                                    isUIVisible = true
-                                    if (currentUser != null) {
-                                        showProfileDialog = true
-                                    } else {
-                                        showAuthDialog = true
+                                // 3. Right Action Buttons (Minimized icons: Random 🎲, Search 🔍, Notifications 🔔, Account 👤)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    // Random Zap (🎲)
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = BrandGold.copy(alpha = 0.20f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, BrandGold.copy(alpha = 0.45f)),
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                SmartOneRepository.playRandomChannel()
+                                                currentScreen = "home"
+                                                Toast.makeText(context, "🎲 Chaîne aléatoire lancée !", Toast.LENGTH_SHORT).show()
+                                            }
+                                            .testTag("random_channel_button")
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Default.Casino,
+                                                contentDescription = "Chaîne Aléatoire",
+                                                tint = BrandGold,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
                                     }
-                                },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("app_user_button")
-                            ) {
-                                Icon(
-                                    imageVector = if (currentUser != null) Icons.Default.AccountCircle else Icons.Default.PersonOutline,
-                                    contentDescription = "Compte",
-                                    tint = if (currentUser != null) BrandCyan else DarkTextPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
+
+                                    // Search (🔍)
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color.White.copy(alpha = 0.12f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.20f)),
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                showSearchDialog = true
+                                            }
+                                            .testTag("app_search_button")
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Default.Search,
+                                                contentDescription = "Rechercher",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+
+                                    // Notifications (🔔)
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color.White.copy(alpha = 0.12f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.20f)),
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                showNotificationsDialog = true
+                                            }
+                                            .testTag("app_notifications_button")
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            BadgedBox(
+                                                badge = {
+                                                    if (notifications.isNotEmpty()) {
+                                                        Badge(
+                                                            containerColor = StatusRed,
+                                                            contentColor = Color.White
+                                                        ) {
+                                                            Text(
+                                                                text = "${notifications.size}",
+                                                                fontSize = 8.sp,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Notifications,
+                                                    contentDescription = "Notifications",
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Profile / User Account (👤)
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = if (currentUser != null) BrandCyan.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.12f),
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            1.dp,
+                                            if (currentUser != null) BrandCyan else Color.White.copy(alpha = 0.20f)
+                                        ),
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                if (currentUser != null) showProfileDialog = true else showAuthDialog = true
+                                            }
+                                            .testTag("app_user_button")
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = if (currentUser != null) Icons.Default.AccountCircle else Icons.Default.PersonOutline,
+                                                contentDescription = "Compte",
+                                                tint = if (currentUser != null) BrandCyan else Color.White,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = DarkSurface,
-                            titleContentColor = DarkTextPrimary
-                        )
-                    )
+                        }
+                        HorizontalDivider(thickness = 1.dp, color = ColorBleuMaronBorder)
+                    }
                 }
             },
             bottomBar = {
@@ -320,83 +364,148 @@ fun SmartOneMainApp() {
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    NavigationBar(
-                        containerColor = DarkSurface,
-                        contentColor = DarkTextPrimary
-                    ) {
-                    NavigationBarItem(
-                        selected = currentScreen == "home",
-                        onClick = { currentScreen = "home" },
-                        icon = { Icon(Icons.Default.Tv, contentDescription = "Accueil") },
-                        label = { Text("Chaînes", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrandCyan,
-                            selectedTextColor = BrandCyan,
-                            indicatorColor = BrandBluePrimary.copy(alpha = 0.2f),
-                            unselectedIconColor = DarkTextMuted,
-                            unselectedTextColor = DarkTextMuted
-                        )
-                    )
+                    Column {
+                        HorizontalDivider(thickness = 1.dp, color = LightBorder)
+                        NavigationBar(
+                            modifier = Modifier.height(90.dp),
+                            containerColor = LightSurface,
+                            contentColor = LightTextPrimary,
+                            tonalElevation = 3.dp
+                        ) {
+                            NavigationBarItem(
+                                selected = currentScreen == "home",
+                                onClick = { currentScreen = "home" },
+                                icon = {
+                                    BadgedBox(
+                                        badge = {
+                                            Badge(
+                                                containerColor = StatusRed,
+                                                contentColor = Color.White
+                                            ) {
+                                                Text("LIVE", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.Tv, contentDescription = "Accueil")
+                                    }
+                                },
+                                label = { Text("Chaînes", fontSize = 11.sp, fontWeight = if (currentScreen == "home") FontWeight.Bold else FontWeight.Medium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = BrandBluePrimary,
+                                    selectedTextColor = BrandBluePrimary,
+                                    indicatorColor = BrandBlueLight,
+                                    unselectedIconColor = LightTextMuted,
+                                    unselectedTextColor = LightTextMuted
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = currentScreen == "plans",
-                        onClick = { currentScreen = "plans" },
-                        icon = { Icon(Icons.Default.CreditCard, contentDescription = "Abonnements") },
-                        label = { Text("Forfaits", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrandCyan,
-                            selectedTextColor = BrandCyan,
-                            indicatorColor = BrandBluePrimary.copy(alpha = 0.2f),
-                            unselectedIconColor = DarkTextMuted,
-                            unselectedTextColor = DarkTextMuted
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = currentScreen == "plans",
+                                onClick = { currentScreen = "plans" },
+                                icon = {
+                                    BadgedBox(
+                                        badge = {
+                                            Badge(
+                                                containerColor = BrandGold,
+                                                contentColor = Color.White
+                                            ) {
+                                                Text("VIP", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.CreditCard, contentDescription = "Abonnements")
+                                    }
+                                },
+                                label = { Text("Forfaits", fontSize = 11.sp, fontWeight = if (currentScreen == "plans") FontWeight.Bold else FontWeight.Medium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = BrandBluePrimary,
+                                    selectedTextColor = BrandBluePrimary,
+                                    indicatorColor = BrandBlueLight,
+                                    unselectedIconColor = LightTextMuted,
+                                    unselectedTextColor = LightTextMuted
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = currentScreen == "deposit",
-                        onClick = { currentScreen = "deposit" },
-                        icon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Dépôt") },
-                        label = { Text("Dépôt", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrandCyan,
-                            selectedTextColor = BrandCyan,
-                            indicatorColor = BrandBluePrimary.copy(alpha = 0.2f),
-                            unselectedIconColor = DarkTextMuted,
-                            unselectedTextColor = DarkTextMuted
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = currentScreen == "deposit",
+                                onClick = { currentScreen = "deposit" },
+                                icon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Dépôt") },
+                                label = { Text("Dépôt", fontSize = 11.sp, fontWeight = if (currentScreen == "deposit") FontWeight.Bold else FontWeight.Medium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = BrandBluePrimary,
+                                    selectedTextColor = BrandBluePrimary,
+                                    indicatorColor = BrandBlueLight,
+                                    unselectedIconColor = LightTextMuted,
+                                    unselectedTextColor = LightTextMuted
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = currentScreen == "fav",
-                        onClick = { currentScreen = "fav" },
-                        icon = { Icon(Icons.Default.Star, contentDescription = "Favoris") },
-                        label = { Text("Favoris", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrandCyan,
-                            selectedTextColor = BrandCyan,
-                            indicatorColor = BrandBluePrimary.copy(alpha = 0.2f),
-                            unselectedIconColor = DarkTextMuted,
-                            unselectedTextColor = DarkTextMuted
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = currentScreen == "fav",
+                                onClick = { currentScreen = "fav" },
+                                icon = {
+                                    if (favorites.isNotEmpty()) {
+                                        BadgedBox(
+                                            badge = {
+                                                Badge(
+                                                    containerColor = BrandGold,
+                                                    contentColor = Color.White
+                                                ) {
+                                                    Text("${favorites.size}", fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                                }
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Star, contentDescription = "Favoris")
+                                        }
+                                    } else {
+                                        Icon(Icons.Default.Star, contentDescription = "Favoris")
+                                    }
+                                },
+                                label = { Text("Favoris", fontSize = 11.sp, fontWeight = if (currentScreen == "fav") FontWeight.Bold else FontWeight.Medium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = BrandBluePrimary,
+                                    selectedTextColor = BrandBluePrimary,
+                                    indicatorColor = BrandBlueLight,
+                                    unselectedIconColor = LightTextMuted,
+                                    unselectedTextColor = LightTextMuted
+                                )
+                            )
 
-                    NavigationBarItem(
-                        selected = currentScreen == "history",
-                        onClick = { currentScreen = "history" },
-                        icon = { Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Historique") },
-                        label = { Text("Historique", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrandCyan,
-                            selectedTextColor = BrandCyan,
-                            indicatorColor = BrandBluePrimary.copy(alpha = 0.2f),
-                            unselectedIconColor = DarkTextMuted,
-                            unselectedTextColor = DarkTextMuted
-                        )
-                    )
+                            NavigationBarItem(
+                                selected = currentScreen == "menu",
+                                onClick = { currentScreen = "menu" },
+                                icon = {
+                                    if (notifications.isNotEmpty()) {
+                                        BadgedBox(
+                                            badge = {
+                                                Badge(
+                                                    containerColor = StatusRed,
+                                                    contentColor = Color.White
+                                                ) {
+                                                    Text("${notifications.size}", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                                }
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                        }
+                                    } else {
+                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                    }
+                                },
+                                label = { Text("Menu", fontSize = 11.sp, fontWeight = if (currentScreen == "menu") FontWeight.Bold else FontWeight.Medium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = BrandBluePrimary,
+                                    selectedTextColor = BrandBluePrimary,
+                                    indicatorColor = BrandBlueLight,
+                                    unselectedIconColor = LightTextMuted,
+                                    unselectedTextColor = LightTextMuted
+                                )
+                            )
+                        }
+                    }
                 }
-            }
-        },
-        containerColor = DarkBackground
+            },
+            containerColor = currentAppBackground
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -615,11 +724,73 @@ fun SmartOneMainApp() {
                             Toast.makeText(context, "Notification supprimée avec succès", Toast.LENGTH_SHORT).show()
                         }
                     )
+
+                    "menu" -> MenuScreen(
+                        currentUser = currentUser,
+                        balance = balance,
+                        activeSubscription = activeSubscription,
+                        notificationsCount = notifications.size,
+                        selectedLanguage = selectedLanguage,
+                        onNavigate = { route -> currentScreen = route },
+                        onSelectCategory = { cat ->
+                            selectedCategory = cat
+                            currentScreen = "home"
+                        },
+                        onOpenProfile = {
+                            if (currentUser != null) showProfileDialog = true else showAuthDialog = true
+                        },
+                        onOpenLanguagePicker = { showLanguageDialog = true },
+                        onOpenNotifications = { showNotificationsDialog = true },
+                        onOpenDownloadApp = { showDownloadDialog = true },
+                        onOpenFaq = { showFaqDialog = true },
+                        onOpenPrivacy = { showPrivacyDialog = true },
+                        onOpenFeedback = { showFeedbackDialog = true },
+                        onOpenAbout = { showAboutDialog = true },
+                        onOpenVideoSettings = { showVideoSettingsDialog = true },
+                        onLogout = {
+                            SmartOneRepository.logout()
+                            Toast.makeText(context, "Vous avez été déconnecté", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+
+                // Floating inaction wake indicator (Toucher pour réactiver)
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !isUIVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 18.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xDD0D1B2A),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, ColorBleuMaronBorder)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(BrandCyan)
+                            )
+                            Text(
+                                text = "Touchez l'écran pour réactiver",
+                                color = Color(0xFFE2E8F0),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-}
 
     // Auth Dialog
     if (showAuthDialog) {
@@ -707,14 +878,13 @@ fun SmartOneMainApp() {
             title = "À propos de SmartOne IPTV",
             content = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SmartOneFullBrandCard(height = 140.dp)
-                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "SmartOne IPTV propose une expérience de streaming global haute définition avec accès aux flux d'actualités, de sport, de cinéma et de divertissement mondial.",
                         color = DarkTextPrimary,
                         fontSize = 13.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Version : 23.0 (Build 23)", color = DarkTextSecondary, fontSize = 12.sp)
                     Text(text = "Éditeur : SmartOne Global Media & Administration", color = DarkTextSecondary, fontSize = 12.sp)
                     Text(text = "Support Disponible : ${SmartOneRepository.SUPPORT_EMAIL}", color = BrandGold, fontSize = 12.sp)
                 }
@@ -875,6 +1045,18 @@ fun SmartOneMainApp() {
                 Toast.makeText(context, "Toutes les notifications ont été supprimées", Toast.LENGTH_SHORT).show()
             },
             onDismiss = { showNotificationsDialog = false }
+        )
+    }
+
+    // Video Display Settings Dialog (Luminosité & Contraste du lecteur)
+    if (showVideoSettingsDialog) {
+        VideoDisplaySettingsDialog(
+            brightness = playerBrightness,
+            contrast = playerContrast,
+            onBrightnessChange = { SmartOneRepository.setPlayerBrightness(it) },
+            onContrastChange = { SmartOneRepository.setPlayerContrast(it) },
+            onReset = { SmartOneRepository.resetVideoDisplaySettings() },
+            onDismiss = { showVideoSettingsDialog = false }
         )
     }
 }

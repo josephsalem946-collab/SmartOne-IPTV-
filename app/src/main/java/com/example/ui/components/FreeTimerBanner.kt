@@ -34,14 +34,15 @@ fun FreeTimerBanner(
             .fillMaxWidth()
             .testTag("free_timer_banner"),
         colors = CardDefaults.cardColors(
-            containerColor = if (activeSubscription != null) DarkSurfaceVariant else DarkSurface
+            containerColor = if (activeSubscription != null) StatusGreenLight.copy(alpha = 0.5f) else LightSurface
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         border = CardDefaults.outlinedCardBorder().copy(
             brush = androidx.compose.ui.graphics.SolidColor(
-                if (activeSubscription != null) StatusGreen.copy(alpha = 0.4f) else DarkBorder
+                if (activeSubscription != null) StatusGreen.copy(alpha = 0.5f) else LightBorder
             )
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -70,21 +71,22 @@ fun FreeTimerBanner(
                         Column {
                             Text(
                                 text = "Abonnement VIP Actif (${activeSubscription.label})",
-                                color = DarkTextPrimary,
+                                color = LightTextPrimary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
                             Text(
                                 text = "Expire le $expiryStr • 2 appareils simultanés max",
                                 color = StatusGreen,
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
 
                     Surface(
                         shape = RoundedCornerShape(20.dp),
-                        color = StatusGreen.copy(alpha = 0.15f)
+                        color = StatusGreenLight
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -126,13 +128,13 @@ fun FreeTimerBanner(
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Temps gratuit aujourd'hui :",
-                                color = DarkTextSecondary,
+                                color = LightTextSecondary,
                                 fontSize = 12.sp
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "$minutes min sur 60",
-                                color = if (minutes > 10) DarkTextPrimary else StatusAmber,
+                                color = if (minutes > 10) LightTextPrimary else StatusAmber,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp
                             )
@@ -145,7 +147,7 @@ fun FreeTimerBanner(
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp)),
                             color = if (minutes > 10) BrandBluePrimary else StatusAmber,
-                            trackColor = DarkSurfaceVariant
+                            trackColor = LightSurfaceVariant
                         )
                     }
 

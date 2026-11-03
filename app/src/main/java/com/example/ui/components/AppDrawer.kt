@@ -41,6 +41,7 @@ fun AppDrawer(
     onOpenPrivacy: () -> Unit,
     onOpenFeedback: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenVideoSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet(
@@ -174,6 +175,10 @@ fun AppDrawer(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                 )
+
+                DrawerNavItem("video_settings", "Luminosité & Contraste", Icons.Default.Tune, selectedNav == "video_settings") {
+                    onOpenVideoSettings()
+                }
 
                 DrawerNavItem("lang", "Langue (${SmartOneRepository.selectedLanguage.value})", Icons.Default.Language, false) {
                     onOpenLanguagePicker()
@@ -330,18 +335,21 @@ fun DrawerNavItem(
     onClick: () -> Unit
 ) {
     NavigationDrawerItem(
-        icon = { Icon(imageVector = icon, contentDescription = null, tint = if (selected) BrandCyan else DarkTextSecondary) },
-        label = { Text(label, fontSize = 14.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+        icon = { Icon(imageVector = icon, contentDescription = null, tint = if (selected) BrandBluePrimary else LightTextSecondary) },
+        label = { Text(label, fontSize = 14.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium) },
         badge = badge?.let {
             {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = BrandGold,
+                    color = BrandGoldLight,
+                    border = CardDefaults.outlinedCardBorder().copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(BrandGold)
+                    ),
                     modifier = Modifier.padding(end = 4.dp)
                 ) {
                     Text(
                         text = it,
-                        color = Color.Black,
+                        color = BrandGoldDark,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -355,11 +363,11 @@ fun DrawerNavItem(
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .testTag("nav_item_$id"),
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = BrandBluePrimary.copy(alpha = 0.2f),
-            selectedTextColor = BrandCyan,
+            selectedContainerColor = BrandBlueLight,
+            selectedTextColor = BrandBluePrimary,
             unselectedContainerColor = Color.Transparent,
-            unselectedTextColor = DarkTextPrimary
+            unselectedTextColor = LightTextPrimary
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(10.dp)
     )
 }

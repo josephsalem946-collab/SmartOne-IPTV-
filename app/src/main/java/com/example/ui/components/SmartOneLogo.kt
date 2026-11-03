@@ -34,7 +34,7 @@ val LogoSapphireBlue = Color(0xFF1D3557)
 val LogoTealCyan = Color(0xFF06B6D4)
 
 enum class SmartOneLogoSize(val iconSize: Dp, val fontSize: TextUnit, val spacing: Dp) {
-    HEADER(38.dp, 18.sp, 9.dp),
+    HEADER(44.dp, 18.sp, 9.dp),
     HEADER_COMPACT(34.dp, 16.sp, 8.dp),
     SMALL(26.dp, 13.sp, 6.dp),
     MEDIUM(36.dp, 17.sp, 8.dp),
@@ -161,6 +161,7 @@ fun SmartOneTriColorText(
 fun SmartOneBrandLogo(
     modifier: Modifier = Modifier,
     size: SmartOneLogoSize = SmartOneLogoSize.MEDIUM,
+    showText: Boolean = true,
     showSubtitle: Boolean = false,
     usePill: Boolean = true
 ) {
@@ -184,27 +185,29 @@ fun SmartOneBrandLogo(
             )
         }
 
-        Spacer(modifier = Modifier.width(size.spacing))
+        if (showText) {
+            Spacer(modifier = Modifier.width(size.spacing))
 
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            SmartOneTriColorText(
-                fontSize = size.fontSize,
-                showIptvBadge = true,
-                containerPill = usePill
-            )
-
-            if (showSubtitle) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "High-Quality Global Streaming",
-                    color = DarkTextMuted,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 0.4.sp
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
+                SmartOneTriColorText(
+                    fontSize = size.fontSize,
+                    showIptvBadge = true,
+                    containerPill = usePill
                 )
+
+                if (showSubtitle) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "High-Quality Global Streaming",
+                        color = DarkTextMuted,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.4.sp
+                    )
+                }
             }
         }
     }

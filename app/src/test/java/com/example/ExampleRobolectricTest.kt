@@ -64,4 +64,28 @@ class ExampleRobolectricTest {
     val lastThirdParty = SmartOneRepository.thirdPartySubscriptions.value.first()
     assertEquals("marie.c@gmail.com", lastThirdParty.recipientIdentifier)
   }
+
+  @Test
+  fun `verify video display brightness and contrast controls`() {
+    SmartOneRepository.resetVideoDisplaySettings()
+    assertEquals(1.0f, SmartOneRepository.playerBrightness.value, 0.001f)
+    assertEquals(1.0f, SmartOneRepository.playerContrast.value, 0.001f)
+
+    SmartOneRepository.setPlayerBrightness(1.3f)
+    assertEquals(1.3f, SmartOneRepository.playerBrightness.value, 0.001f)
+
+    SmartOneRepository.setPlayerContrast(0.8f)
+    assertEquals(0.8f, SmartOneRepository.playerContrast.value, 0.001f)
+
+    // Verify bounds clamping (0.5f to 1.5f)
+    SmartOneRepository.setPlayerBrightness(2.5f)
+    assertEquals(1.5f, SmartOneRepository.playerBrightness.value, 0.001f)
+
+    SmartOneRepository.setPlayerContrast(0.1f)
+    assertEquals(0.5f, SmartOneRepository.playerContrast.value, 0.001f)
+
+    SmartOneRepository.resetVideoDisplaySettings()
+    assertEquals(1.0f, SmartOneRepository.playerBrightness.value, 0.001f)
+    assertEquals(1.0f, SmartOneRepository.playerContrast.value, 0.001f)
+  }
 }

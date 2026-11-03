@@ -2,7 +2,6 @@ package com.example.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -10,39 +9,22 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = BrandCyan,
-    onPrimary = DarkBackground,
-    primaryContainer = BrandBluePrimary,
-    onPrimaryContainer = DarkTextPrimary,
-    secondary = BrandGold,
-    onSecondary = DarkBackground,
-    secondaryContainer = DarkSurfaceVariant,
-    onSecondaryContainer = BrandGold,
-    background = DarkBackground,
-    onBackground = DarkTextPrimary,
-    surface = DarkSurface,
-    onSurface = DarkTextPrimary,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = DarkTextSecondary,
-    outline = DarkBorder,
-    error = StatusRed
-)
-
 private val LightColorScheme = lightColorScheme(
     primary = BrandBluePrimary,
-    onPrimary = LightSurface,
-    primaryContainer = BrandCyan,
-    onPrimaryContainer = LightTextPrimary,
-    secondary = BrandGoldDark,
-    onSecondary = LightSurface,
-    secondaryContainer = LightSurfaceVariant,
-    onSecondaryContainer = LightTextPrimary,
+    onPrimary = Color.White,
+    primaryContainer = BrandBlueLight,
+    onPrimaryContainer = BrandBluePrimary,
+    secondary = BrandGold,
+    onSecondary = Color.White,
+    secondaryContainer = BrandGoldLight,
+    onSecondaryContainer = BrandGoldDark,
+    tertiary = BrandCyan,
+    onTertiary = Color.White,
     background = LightBackground,
     onBackground = LightTextPrimary,
     surface = LightSurface,
@@ -50,12 +32,16 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightTextSecondary,
     outline = LightBorder,
+    outlineVariant = LightBorderSubtle,
     error = StatusRed
 )
 
+// In case dark mode is toggled, maintain high readability and smooth contrasts
+private val DarkColorScheme = LightColorScheme
+
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = true, // Default to sleek IPTV dark theme for rich viewing
+    darkTheme: Boolean = false, // Clean, soothing light white background by default
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -72,7 +58,9 @@ fun MyApplicationTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            // The top bar is dark navy (ColorBleuMaronFonce), so status bar icons should be light/white:
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = true
         }
     }
 

@@ -144,15 +144,21 @@ fun PlansScreen(
                         FilterChip(
                             selected = !isPayingForOther,
                             onClick = { isPayingForOther = false; recipientError = null },
-                            label = { Text("Pou mwen menm", fontSize = 12.sp) },
+                            label = { Text("Pou mwen menm", fontSize = 12.sp, fontWeight = if (!isPayingForOther) FontWeight.Bold else FontWeight.Medium) },
                             leadingIcon = {
                                 Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp))
                             },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = BrandCyan,
-                                selectedLabelColor = Color.Black,
-                                containerColor = DarkSurfaceVariant,
-                                labelColor = DarkTextPrimary
+                                selectedContainerColor = BrandBlueLight,
+                                selectedLabelColor = BrandBluePrimary,
+                                selectedLeadingIconColor = BrandBluePrimary,
+                                containerColor = LightSurfaceVariant,
+                                labelColor = LightTextPrimary
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = !isPayingForOther,
+                                borderColor = if (!isPayingForOther) BrandBluePrimary else LightBorder
                             ),
                             modifier = Modifier.weight(1f)
                         )
@@ -160,15 +166,21 @@ fun PlansScreen(
                         FilterChip(
                             selected = isPayingForOther,
                             onClick = { isPayingForOther = true },
-                            label = { Text("Peye pou yon lòt", fontSize = 12.sp) },
+                            label = { Text("Peye pou yon lòt", fontSize = 12.sp, fontWeight = if (isPayingForOther) FontWeight.Bold else FontWeight.Medium) },
                             leadingIcon = {
                                 Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
                             },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = BrandGold,
-                                selectedLabelColor = Color.Black,
-                                containerColor = DarkSurfaceVariant,
-                                labelColor = DarkTextPrimary
+                                selectedContainerColor = BrandGoldLight,
+                                selectedLabelColor = BrandGoldDark,
+                                selectedLeadingIconColor = BrandGoldDark,
+                                containerColor = LightSurfaceVariant,
+                                labelColor = LightTextPrimary
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isPayingForOther,
+                                borderColor = if (isPayingForOther) BrandGold else LightBorder
                             ),
                             modifier = Modifier.weight(1f)
                         )
@@ -198,7 +210,7 @@ fun PlansScreen(
                         } else {
                             Text(
                                 text = "Antre email oubyen nimewo telefòn kont lòt moun lan pou aktive abònman an dirèkteman sou kont li :",
-                                color = DarkTextSecondary,
+                                color = LightTextSecondary,
                                 fontSize = 12.sp
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -209,7 +221,7 @@ fun PlansScreen(
                                     if (recipientError != null) recipientError = null
                                 },
                                 label = { Text("Email oswa Nimewo Telefòn (+509...)") },
-                                placeholder = { Text("+509 3215 3281 oswa kliyan@gmail.com", color = DarkTextMuted) },
+                                placeholder = { Text("+509 3215 3281 oswa kliyan@gmail.com", color = LightTextMuted) },
                                 isError = recipientError != null,
                                 singleLine = true,
                                 modifier = Modifier
@@ -217,9 +229,9 @@ fun PlansScreen(
                                     .testTag("third_party_recipient_input"),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = BrandGold,
-                                    unfocusedBorderColor = DarkBorder,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,
+                                    unfocusedBorderColor = LightBorder,
+                                    focusedTextColor = LightTextPrimary,
+                                    unfocusedTextColor = LightTextPrimary,
                                     errorBorderColor = StatusRed
                                 )
                             )

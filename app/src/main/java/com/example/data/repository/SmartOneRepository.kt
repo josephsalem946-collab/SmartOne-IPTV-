@@ -280,6 +280,26 @@ object SmartOneRepository {
     private val _selectedLanguage = MutableStateFlow("Français")
     val selectedLanguage: StateFlow<String> = _selectedLanguage.asStateFlow()
 
+    // Video display controls (Luminosité & Contraste du lecteur)
+    private val _playerBrightness = MutableStateFlow(1.0f) // 0.5f to 1.5f (1.0 = 100%)
+    val playerBrightness: StateFlow<Float> = _playerBrightness.asStateFlow()
+
+    private val _playerContrast = MutableStateFlow(1.0f) // 0.5f to 1.5f (1.0 = 100%)
+    val playerContrast: StateFlow<Float> = _playerContrast.asStateFlow()
+
+    fun setPlayerBrightness(value: Float) {
+        _playerBrightness.value = value.coerceIn(0.5f, 1.5f)
+    }
+
+    fun setPlayerContrast(value: Float) {
+        _playerContrast.value = value.coerceIn(0.5f, 1.5f)
+    }
+
+    fun resetVideoDisplaySettings() {
+        _playerBrightness.value = 1.0f
+        _playerContrast.value = 1.0f
+    }
+
     // Actions
     fun playChannel(channel: Channel) {
         _currentPlaying.value = channel

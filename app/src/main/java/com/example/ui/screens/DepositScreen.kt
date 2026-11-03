@@ -186,7 +186,7 @@ fun DepositScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
-                                    Text("${deposit.gatewayName} • ${deposit.amountHtg.toInt()} HTG", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Text("${deposit.gatewayName} • ${deposit.amountHtg.toInt()} HTG", color = LightTextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                     Text("Réf: ${deposit.transactionRef}", color = DarkTextMuted, fontSize = 10.sp)
                                 }
                                 Surface(shape = RoundedCornerShape(4.dp), color = StatusAmber.copy(alpha = 0.2f)) {
@@ -329,10 +329,10 @@ fun DepositScreen(
                             .fillMaxWidth()
                             .testTag("deposit_amount_field"),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = BrandCyan,
-                            unfocusedBorderColor = DarkBorder,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
+                            focusedBorderColor = BrandBluePrimary,
+                            unfocusedBorderColor = LightBorder,
+                            focusedTextColor = LightTextPrimary,
+                            unfocusedTextColor = LightTextPrimary
                         ),
                         trailingIcon = {
                             Text(

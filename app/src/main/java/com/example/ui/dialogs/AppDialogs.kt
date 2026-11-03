@@ -95,12 +95,13 @@ fun AuthDialog(
                             errorMessage = ""
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isLoginTab) BrandBluePrimary else DarkSurfaceVariant
+                            containerColor = if (isLoginTab) BrandBluePrimary else LightSurfaceVariant,
+                            contentColor = if (isLoginTab) Color.White else LightTextPrimary
                         ),
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Connexion", fontSize = 12.sp, color = Color.White)
+                        Text("Connexion", fontSize = 12.sp, fontWeight = if (isLoginTab) FontWeight.Bold else FontWeight.Medium)
                     }
 
                     Button(
@@ -109,12 +110,13 @@ fun AuthDialog(
                             errorMessage = ""
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (!isLoginTab) BrandBluePrimary else DarkSurfaceVariant
+                            containerColor = if (!isLoginTab) BrandBluePrimary else LightSurfaceVariant,
+                            contentColor = if (!isLoginTab) Color.White else LightTextPrimary
                         ),
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Inscription (+18)", fontSize = 12.sp, color = Color.White)
+                        Text("Inscription (+18)", fontSize = 12.sp, fontWeight = if (!isLoginTab) FontWeight.Bold else FontWeight.Medium)
                     }
                 }
 
@@ -1017,6 +1019,251 @@ fun DownloadAppDialog(
             }
         },
         confirmButton = {},
+        containerColor = DarkSurface,
+        titleContentColor = DarkTextPrimary,
+        textContentColor = DarkTextPrimary
+    )
+}
+
+@Composable
+fun VideoDisplaySettingsDialog(
+    brightness: Float,
+    contrast: Float,
+    onBrightnessChange: (Float) -> Unit,
+    onContrastChange: (Float) -> Unit,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = BrandCyan,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Luminosité & Contraste",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = DarkTextPrimary
+                    )
+                }
+                IconButton(onClick = onDismiss) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Fermer", tint = DarkTextSecondary)
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "Ajustez la luminosité et le contraste du lecteur vidéo en temps réel selon votre confort visuel.",
+                    fontSize = 12.sp,
+                    color = DarkTextSecondary
+                )
+
+                // Brightness Section
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = BrandGold,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Luminosité",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = DarkTextPrimary
+                                )
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = BrandGold.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "${(brightness * 100).toInt()}%",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = BrandGold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+
+                        Slider(
+                            value = brightness,
+                            onValueChange = onBrightnessChange,
+                            valueRange = 0.5f..1.5f,
+                            steps = 19,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = SliderDefaults.colors(
+                                thumbColor = BrandGold,
+                                activeTrackColor = BrandGold,
+                                inactiveTrackColor = Color.DarkGray
+                            )
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("50% (Sombre)", fontSize = 10.sp, color = DarkTextMuted)
+                            Text("100% (Normal)", fontSize = 10.sp, color = DarkTextMuted)
+                            Text("150% (Lumineux)", fontSize = 10.sp, color = DarkTextMuted)
+                        }
+                    }
+                }
+
+                // Contrast Section
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = null,
+                                    tint = BrandCyan,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Contraste",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = DarkTextPrimary
+                                )
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = BrandCyan.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "${(contrast * 100).toInt()}%",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = BrandCyan,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+
+                        Slider(
+                            value = contrast,
+                            onValueChange = onContrastChange,
+                            valueRange = 0.5f..1.5f,
+                            steps = 19,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = SliderDefaults.colors(
+                                thumbColor = BrandCyan,
+                                activeTrackColor = BrandCyan,
+                                inactiveTrackColor = Color.DarkGray
+                            )
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("50% (Doux)", fontSize = 10.sp, color = DarkTextMuted)
+                            Text("100% (Normal)", fontSize = 10.sp, color = DarkTextMuted)
+                            Text("150% (Vif/Intense)", fontSize = 10.sp, color = DarkTextMuted)
+                        }
+                    }
+                }
+
+                // Quick Presets
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            onBrightnessChange(1.0f)
+                            onContrastChange(1.0f)
+                        },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Normal", fontSize = 11.sp, maxLines = 1)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            onBrightnessChange(0.85f)
+                            onContrastChange(1.15f)
+                        },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Cinéma Nuit", fontSize = 11.sp, maxLines = 1)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            onBrightnessChange(1.20f)
+                            onContrastChange(1.10f)
+                        },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Mode Jour", fontSize = 11.sp, maxLines = 1)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = BrandBluePrimary)
+            ) {
+                Text("Appliquer & Fermer", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onReset
+            ) {
+                Text("Réinitialiser", color = StatusAmber, fontSize = 12.sp)
+            }
+        },
         containerColor = DarkSurface,
         titleContentColor = DarkTextPrimary,
         textContentColor = DarkTextPrimary

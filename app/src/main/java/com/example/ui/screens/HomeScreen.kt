@@ -84,39 +84,39 @@ fun HomeScreen(
 
                 // Official SmartOne IPTV Brand Strip
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color(0xFF0F172A),
-                                        Color(0xFF0B1120)
-                                    )
-                                )
-                            )
-                            .border(1.dp, BrandCyan.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = LightSurface),
+                        border = CardDefaults.outlinedCardBorder().copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(LightBorder)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                     ) {
-                        SmartOneBrandLogo(size = SmartOneLogoSize.MEDIUM, showSubtitle = true)
-
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = LogoCopperGold.copy(alpha = 0.15f),
-                            border = CardDefaults.outlinedCardBorder().copy(
-                                brush = androidx.compose.ui.graphics.SolidColor(LogoCopperGold)
-                            )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "4K • 60fps",
-                                color = LogoCopperGold,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
+                            SmartOneBrandLogo(size = SmartOneLogoSize.MEDIUM, showSubtitle = true)
+
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = BrandGoldLight,
+                                border = CardDefaults.outlinedCardBorder().copy(
+                                    brush = androidx.compose.ui.graphics.SolidColor(BrandGold)
+                                )
+                            ) {
+                                Text(
+                                    text = "4K • 60fps",
+                                    color = BrandGoldDark,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -144,6 +144,95 @@ fun HomeScreen(
                         onNavigateToDeposit = onOpenPlans
                     )
                 }
+
+                // Quick Zapping Express Row
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "⚡ Zapping Express",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = DarkTextPrimary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = StatusRed.copy(alpha = 0.12f)
+                                ) {
+                                    Text(
+                                        text = "LIVE",
+                                        color = StatusRed,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Black,
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = "1-Tap pour regarder",
+                                fontSize = 11.sp,
+                                color = DarkTextMuted
+                            )
+                        }
+
+                        val quickZapScroll = rememberScrollState()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(quickZapScroll),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            channels.take(12).forEach { ch ->
+                                val isChPlaying = currentPlaying?.id == ch.id && isPlaying
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (isChPlaying) BrandBlueLight else LightSurface,
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        if (isChPlaying) BrandBluePrimary else LightBorder
+                                    ),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable { onSelectChannel(ch) }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = ch.countryCode, fontSize = 16.sp)
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Column {
+                                            Text(
+                                                text = ch.name,
+                                                fontSize = 12.sp,
+                                                fontWeight = if (isChPlaying) FontWeight.Bold else FontWeight.SemiBold,
+                                                color = if (isChPlaying) BrandBluePrimary else LightTextPrimary,
+                                                maxLines = 1
+                                            )
+                                            Text(
+                                                text = ch.resolution,
+                                                fontSize = 9.5.sp,
+                                                color = if (isChPlaying) BrandBluePrimary else LightTextMuted
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (!isImmersiveMode) {
@@ -154,19 +243,20 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(DarkSurfaceVariant)
+                                .background(BrandBlueLight)
+                                .border(1.dp, BrandBluePrimary.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = "Recherche : \"$searchQuery\"",
-                                color = BrandCyan,
+                                color = BrandBluePrimary,
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.SemiBold
                             )
                             IconButton(onClick = onClearSearch, modifier = Modifier.size(24.dp)) {
-                                Icon(imageVector = Icons.Default.Close, contentDescription = "Effacer", tint = DarkTextSecondary)
+                                Icon(imageVector = Icons.Default.Close, contentDescription = "Effacer", tint = BrandBluePrimary)
                             }
                         }
                     }
@@ -183,20 +273,38 @@ fun HomeScreen(
                     ) {
                         for (cat in SmartOneRepository.categories) {
                             val isSelected = cat == selectedCategory
+                            val catIcon = when (cat.lowercase()) {
+                                "toutes" -> "📺 "
+                                "sport", "sports" -> "⚽ "
+                                "cinéma", "films", "cinema" -> "🎬 "
+                                "infos", "actualités", "nouvelles" -> "📰 "
+                                "musique" -> "🎵 "
+                                "jeunesse", "enfants" -> "🧸 "
+                                "haïti", "haiti" -> "🇭🇹 "
+                                "international", "monde" -> "🌍 "
+                                "divertissement" -> "🍿 "
+                                else -> "✨ "
+                            }
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { onSelectCategory(cat) },
-                                label = { Text(cat, fontSize = 13.sp) },
+                                label = {
+                                    Text(
+                                        text = "$catIcon$cat",
+                                        fontSize = 12.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = DarkSurface,
-                                    labelColor = DarkTextSecondary,
+                                    containerColor = LightSurface,
+                                    labelColor = LightTextSecondary,
                                     selectedContainerColor = BrandBluePrimary,
                                     selectedLabelColor = Color.White
                                 ),
                                 border = FilterChipDefaults.filterChipBorder(
                                     enabled = true,
                                     selected = isSelected,
-                                    borderColor = if (isSelected) BrandCyan else DarkBorder
+                                    borderColor = if (isSelected) BrandBluePrimary else LightBorder
                                 ),
                                 shape = RoundedCornerShape(20.dp),
                                 modifier = Modifier.testTag("cat_chip_$cat")

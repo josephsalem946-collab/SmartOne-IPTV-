@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.Channel
 import com.example.data.network.ConnectionQuality
 import com.example.data.network.NetworkStatusMonitor
+import com.example.data.repository.SmartOneRepository
 import com.example.ui.theme.*
 
 @Composable
@@ -52,6 +53,8 @@ fun PlayerView(
     var lastPlayerInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     val networkStatus by NetworkStatusMonitor.networkStatus.collectAsStateWithLifecycle()
+    val playerBrightness by SmartOneRepository.playerBrightness.collectAsStateWithLifecycle()
+    val playerContrast by SmartOneRepository.playerContrast.collectAsStateWithLifecycle()
     var selectedQuality by remember { mutableStateOf("Auto (Adaptatif)") }
     var showQualityMenu by remember { mutableStateOf(false) }
 
@@ -126,6 +129,41 @@ fun PlayerView(
                         )
                     }
 
+                    // Video Display Adjustments (Luminosité & Contraste effect layer)
+                    if (playerBrightness < 1.0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = (1.0f - playerBrightness) * 0.85f))
+                        )
+                    } else if (playerBrightness > 1.0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White.copy(alpha = (playerBrightness - 1.0f) * 0.40f))
+                        )
+                    }
+
+                    if (playerContrast != 1.0f) {
+                        if (playerContrast > 1.0f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.radialGradient(
+                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = (playerContrast - 1.0f) * 0.35f))
+                                        )
+                                    )
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Gray.copy(alpha = (1.0f - playerContrast) * 0.30f))
+                            )
+                        }
+                    }
+
                     // Top Badges Overlay (EN DIRECT, 4K UHD 60fps, 59 min gratuit)
                     BoxOverlayVisibility(
                         visible = areOverlaysVisible,
@@ -168,42 +206,43 @@ fun PlayerView(
                                 // Adaptive Resolution badge ("Auto 480p / 4K UHD")
                                 Box {
                                     Surface(
-                                        shape = RoundedCornerShape(6.dp),
-                                        color = if (networkStatus.isWeak) StatusAmber.copy(alpha = 0.25f) else Color(0x66000000),
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = if (networkStatus.isWeak) Color(0xFFFEF3C7) else Color(0xF2FFFFFF),
                                         modifier = Modifier.clickable { showQualityMenu = true }
                                     ) {
                                         Row(
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             if (networkStatus.isWeak) {
                                                 Icon(
                                                     imageVector = Icons.Default.SignalCellularAlt,
                                                     contentDescription = null,
-                                                    tint = StatusAmber,
-                                                    modifier = Modifier.size(12.dp)
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(10.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(3.dp))
+                                                Spacer(modifier = Modifier.width(2.dp))
                                             }
                                             Text(
                                                 text = effectiveResolution,
-                                                color = if (networkStatus.isWeak) StatusAmber else BrandCyan,
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.SemiBold
+                                                color = Color.Black,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold
                                             )
                                             Spacer(modifier = Modifier.width(2.dp))
                                             Icon(
                                                 imageVector = Icons.Default.ArrowDropDown,
                                                 contentDescription = "Changer la qualité",
-                                                tint = Color.White.copy(alpha = 0.7f),
-                                                modifier = Modifier.size(14.dp)
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(11.dp)
                                             )
                                         }
                                     }
 
                                     DropdownMenu(
                                         expanded = showQualityMenu,
-                                        onDismissRequest = { showQualityMenu = false }
+                                        onDismissRequest = { showQualityMenu = false },
+                                        modifier = Modifier.background(Color.White)
                                     ) {
                                         listOf(
                                             "Auto (Adaptatif)",
@@ -218,8 +257,9 @@ fun PlayerView(
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                                         Text(
                                                             text = quality,
-                                                            color = if (selectedQuality == quality) BrandCyan else Color.White,
-                                                            fontWeight = if (selectedQuality == quality) FontWeight.Bold else FontWeight.Normal
+                                                            color = if (selectedQuality == quality) Color(0xFF0284C7) else Color.Black,
+                                                            fontSize = 11.sp,
+                                                            fontWeight = if (selectedQuality == quality) FontWeight.Bold else FontWeight.Medium
                                                         )
                                                     }
                                                 },
@@ -236,48 +276,48 @@ fun PlayerView(
                             // Free quota or plan badge ("59 min gratuit" / "VIP Actif")
                             if (!hasActiveSubscription) {
                                 Surface(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = RoundedCornerShape(4.dp),
                                     color = if (freeMinutesLeft < 10) StatusAmber.copy(alpha = 0.25f) else Color(0x66000000)
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Timer,
                                             contentDescription = null,
                                             tint = if (freeMinutesLeft < 10) StatusAmber else BrandCyan,
-                                            modifier = Modifier.size(13.dp)
+                                            modifier = Modifier.size(10.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(3.dp))
                                         Text(
                                             text = "$freeMinutesLeft min gratuit",
                                             color = Color.White,
-                                            fontSize = 11.sp,
+                                            fontSize = 9.sp,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
                                 }
                             } else {
                                 Surface(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = RoundedCornerShape(4.dp),
                                     color = StatusGreen.copy(alpha = 0.2f)
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Devices,
                                             contentDescription = null,
                                             tint = StatusGreen,
-                                            modifier = Modifier.size(13.dp)
+                                            modifier = Modifier.size(10.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(3.dp))
                                         Text(
                                             text = "VIP (2 écrans max)",
                                             color = StatusGreen,
-                                            fontSize = 11.sp,
+                                            fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
@@ -374,23 +414,41 @@ fun PlayerView(
                                 fontWeight = FontWeight.Medium
                             )
 
-                            // Icône Plein écran
-                            IconButton(
-                                onClick = {
-                                    lastPlayerInteractionTime = System.currentTimeMillis()
-                                    areOverlaysVisible = true
-                                    isExpandedAspect = !isExpandedAspect
-                                },
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .testTag("player_fullscreen_button")
-                            ) {
-                                Icon(
-                                    imageVector = if (isExpandedAspect) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                    contentDescription = if (isExpandedAspect) "Quitter plein écran" else "Plein écran",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (playerBrightness != 1.0f || playerContrast != 1.0f) {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0x99000000),
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "LUM: ${(playerBrightness * 100).toInt()}% • CONT: ${(playerContrast * 100).toInt()}%",
+                                            color = Color(0xFFFDE68A),
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+
+                                // Icône Plein écran
+                                IconButton(
+                                    onClick = {
+                                        lastPlayerInteractionTime = System.currentTimeMillis()
+                                        areOverlaysVisible = true
+                                        isExpandedAspect = !isExpandedAspect
+                                    },
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .testTag("player_fullscreen_button")
+                                ) {
+                                    Icon(
+                                        imageVector = if (isExpandedAspect) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                        contentDescription = if (isExpandedAspect) "Quitter plein écran" else "Plein écran",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -452,14 +510,17 @@ fun PlayerView(
                             )
                         }
 
-                        // Stop button
-                        OutlinedIconButton(
+                        // Stop button (Bouton blanc avec icône Stop contrastée)
+                        FilledIconButton(
                             onClick = {
                                 lastPlayerInteractionTime = System.currentTimeMillis()
                                 areOverlaysVisible = true
                                 onStop()
                             },
-                            colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = DarkTextPrimary),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = Color.White,
+                                contentColor = Color(0xFF0F172A)
+                            ),
                             modifier = Modifier
                                 .size(40.dp)
                                 .testTag("player_stop_button")

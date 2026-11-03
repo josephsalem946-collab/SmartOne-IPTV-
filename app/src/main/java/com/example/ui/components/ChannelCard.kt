@@ -1,12 +1,12 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
@@ -35,18 +35,18 @@ fun ChannelCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onSelect)
             .testTag("channel_item_${channel.id}"),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrentlyPlaying) DarkSurfaceVariant else DarkSurface
+            containerColor = if (isCurrentlyPlaying) BrandBlueLight else LightSurface
         ),
         border = CardDefaults.outlinedCardBorder().copy(
             brush = androidx.compose.ui.graphics.SolidColor(
-                if (isCurrentlyPlaying) BrandCyan else DarkBorder
+                if (isCurrentlyPlaying) BrandBluePrimary else LightBorder
             )
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrentlyPlaying) 4.dp else 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrentlyPlaying) 3.dp else 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -57,10 +57,15 @@ fun ChannelCard(
             // Country Flag / Channel avatar
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(46.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (isCurrentlyPlaying) BrandBluePrimary.copy(alpha = 0.25f) else Color(0xFF0F172A)
+                        if (isCurrentlyPlaying) Color(0xFFDBEAFE) else LightSurfaceVariant
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isCurrentlyPlaying) BrandBluePrimary.copy(alpha = 0.35f) else LightBorder,
+                        shape = RoundedCornerShape(10.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -77,7 +82,7 @@ fun ChannelCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = channel.name,
-                        color = if (isCurrentlyPlaying) BrandCyan else DarkTextPrimary,
+                        color = if (isCurrentlyPlaying) BrandBluePrimary else LightTextPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                         maxLines = 1,
@@ -87,7 +92,7 @@ fun ChannelCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .size(6.dp)
+                                .size(7.dp)
                                 .clip(CircleShape)
                                 .background(StatusRed)
                         )
@@ -98,7 +103,7 @@ fun ChannelCard(
 
                 Text(
                     text = channel.currentProgram,
-                    color = DarkTextSecondary,
+                    color = LightTextSecondary,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -112,25 +117,32 @@ fun ChannelCard(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(4.dp),
-                        color = DarkSurfaceVariant
+                        color = LightSurfaceVariant,
+                        border = CardDefaults.outlinedCardBorder().copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(LightBorder)
+                        )
                     ) {
                         Text(
                             text = channel.category,
-                            color = DarkTextMuted,
+                            color = LightTextMuted,
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
 
                     Surface(
                         shape = RoundedCornerShape(4.dp),
-                        color = DarkSurfaceVariant
+                        color = LightSurfaceVariant,
+                        border = CardDefaults.outlinedCardBorder().copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(LightBorder)
+                        )
                     ) {
                         Text(
                             text = channel.resolution,
-                            color = DarkTextMuted,
+                            color = LightTextMuted,
                             fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -141,13 +153,13 @@ fun ChannelCard(
             IconButton(
                 onClick = onToggleFavorite,
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(38.dp)
                     .testTag("fav_button_${channel.id}")
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = "Favori",
-                    tint = if (isFavorite) BrandGold else DarkTextMuted,
+                    tint = if (isFavorite) BrandGold else LightTextMuted,
                     modifier = Modifier.size(20.dp)
                 )
             }
