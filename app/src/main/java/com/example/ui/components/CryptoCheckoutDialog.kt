@@ -127,9 +127,9 @@ fun CryptoCheckoutDialog(
                             )
                             Text(
                                 text = networkName,
-                                color = BrandCyan,
+                                color = Color.White.copy(alpha = 0.95f),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Medium
                             )
                         }
 

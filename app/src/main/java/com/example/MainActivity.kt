@@ -141,9 +141,15 @@ fun SmartOneMainApp() {
         }
     }
 
-    // Back button handling: return to home screen if on sub-screen
-    BackHandler(enabled = currentScreen != "home") {
-        currentScreen = "home"
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    // Back button handling: close drawer if open, or return to home screen if on sub-screen
+    BackHandler(enabled = drawerState.isOpen || currentScreen != "home") {
+        if (drawerState.isOpen) {
+            coroutineScope.launch { drawerState.close() }
+        } else {
+            currentScreen = "home"
+        }
     }
 
     val currentAppBackground by androidx.compose.animation.animateColorAsState(
@@ -152,77 +158,168 @@ fun SmartOneMainApp() {
         label = "scaffold_inaction_bg"
     )
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                        if (event.changes.isNotEmpty()) {
-                            lastInteractionTime = System.currentTimeMillis()
-                            if (!isUIVisible) {
-                                isUIVisible = true
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = isUIVisible,
+        drawerContent = {
+            AppDrawer(
+                currentUser = currentUser,
+                selectedNav = currentScreen,
+                onNavigate = { route ->
+                    currentScreen = route
+                    coroutineScope.launch { drawerState.close() }
+                },
+                onSelectCategory = { cat ->
+                    selectedCategory = cat
+                    currentScreen = "home"
+                    coroutineScope.launch { drawerState.close() }
+                },
+                onOpenProfile = {
+                    coroutineScope.launch { drawerState.close() }
+                    if (currentUser != null) showProfileDialog = true else showAuthDialog = true
+                },
+                onOpenLanguagePicker = {
+                    coroutineScope.launch { drawerState.close() }
+                    showLanguageDialog = true
+                },
+                onOpenAdmin = {
+                    coroutineScope.launch { drawerState.close() }
+                    currentScreen = "admin"
+                },
+                onOpenAbout = {
+                    coroutineScope.launch { drawerState.close() }
+                    showAboutDialog = true
+                },
+                onOpenDownloadApp = {
+                    coroutineScope.launch { drawerState.close() }
+                    showDownloadDialog = true
+                },
+                onOpenFaq = {
+                    coroutineScope.launch { drawerState.close() }
+                    showFaqDialog = true
+                },
+                onOpenPrivacy = {
+                    coroutineScope.launch { drawerState.close() }
+                    showPrivacyDialog = true
+                },
+                onOpenFeedback = {
+                    coroutineScope.launch { drawerState.close() }
+                    showFeedbackDialog = true
+                },
+                onOpenNotifications = {
+                    coroutineScope.launch { drawerState.close() }
+                    showNotificationsDialog = true
+                },
+                onOpenVideoSettings = {
+                    coroutineScope.launch { drawerState.close() }
+                    showVideoSettingsDialog = true
+                }
+            )
+        }
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            if (event.changes.isNotEmpty()) {
+                                lastInteractionTime = System.currentTimeMillis()
+                                if (!isUIVisible) {
+                                    isUIVisible = true
+                                }
                             }
                         }
                     }
                 }
-            }
-            .clickable(
-                enabled = !isUIVisible,
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                indication = null
-            ) {
-                lastInteractionTime = System.currentTimeMillis()
-                isUIVisible = true
-            },
-        topBar = {
-            AnimatedVisibility(
-                visible = isUIVisible,
-                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(ColorBleuMaronFonce)
+                .clickable(
+                    enabled = !isUIVisible,
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null
                 ) {
-                    Surface(
+                    lastInteractionTime = System.currentTimeMillis()
+                    isUIVisible = true
+                },
+            topBar = {
+                AnimatedVisibility(
+                    visible = isUIVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .statusBarsPadding()
-                            .height(64.dp),
-                        color = ColorBleuMaronFonce
+                            .background(ColorBleuMaronFonce)
                     ) {
-                        Row(
+                        Surface(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                                .fillMaxWidth()
+                                .statusBarsPadding()
+                                .height(64.dp),
+                            color = ColorBleuMaronFonce
                         ) {
-
-                                // 2. Center Branding (ONLY emblem icon, no text)
-                                Surface(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clip(CircleShape)
-                                        .clickable {
-                                            lastInteractionTime = System.currentTimeMillis()
-                                            isUIVisible = true
-                                            currentScreen = "home"
-                                        },
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    shadowElevation = 3.dp,
-                                    border = androidx.compose.foundation.BorderStroke(1.2.dp, ColorONEGold)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                // 1. Left Section: Lateral Menu Icon (☰) & Emblem (SmartOne)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    androidx.compose.foundation.Image(
-                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
-                                        contentDescription = "SmartOne Emblem",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
-                                    )
+                                    // Lateral Menu Trigger Button (☰)
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color.White.copy(alpha = 0.12f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.20f)),
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                coroutineScope.launch {
+                                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                                }
+                                            }
+                                            .testTag("app_lateral_menu_button")
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Default.Menu,
+                                                contentDescription = "Menu Latéral",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+
+                                    // Emblem icon
+                                    Surface(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                lastInteractionTime = System.currentTimeMillis()
+                                                isUIVisible = true
+                                                currentScreen = "home"
+                                            },
+                                        shape = CircleShape,
+                                        color = Color.White,
+                                        shadowElevation = 3.dp,
+                                        border = androidx.compose.foundation.BorderStroke(1.2.dp, ColorONEGold)
+                                    ) {
+                                        androidx.compose.foundation.Image(
+                                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
+                                            contentDescription = "SmartOne Emblem",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                        )
+                                    }
                                 }
 
                                 // 3. Right Action Buttons (Minimized icons: Random 🎲, Search 🔍, Notifications 🔔, Account 👤)
@@ -367,10 +464,10 @@ fun SmartOneMainApp() {
                     Column {
                         HorizontalDivider(thickness = 1.dp, color = LightBorder)
                         NavigationBar(
-                            modifier = Modifier.height(90.dp),
+                            modifier = Modifier.height(96.dp),
                             containerColor = LightSurface,
                             contentColor = LightTextPrimary,
-                            tonalElevation = 3.dp
+                            tonalElevation = 4.dp
                         ) {
                             NavigationBarItem(
                                 selected = currentScreen == "home",
@@ -382,14 +479,18 @@ fun SmartOneMainApp() {
                                                 containerColor = StatusRed,
                                                 contentColor = Color.White
                                             ) {
-                                                Text("LIVE", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                                Text("LIVE", fontSize = 8.5.sp, fontWeight = FontWeight.Bold)
                                             }
                                         }
                                     ) {
-                                        Icon(Icons.Default.Tv, contentDescription = "Accueil")
+                                        Icon(
+                                            Icons.Default.Tv,
+                                            contentDescription = "Accueil",
+                                            modifier = Modifier.size(24.dp)
+                                        )
                                     }
                                 },
-                                label = { Text("Chaînes", fontSize = 11.sp, fontWeight = if (currentScreen == "home") FontWeight.Bold else FontWeight.Medium) },
+                                label = { Text("Chaînes", fontSize = 12.sp, fontWeight = if (currentScreen == "home") FontWeight.Bold else FontWeight.Medium) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = BrandBluePrimary,
                                     selectedTextColor = BrandBluePrimary,
@@ -409,14 +510,18 @@ fun SmartOneMainApp() {
                                                 containerColor = BrandGold,
                                                 contentColor = Color.White
                                             ) {
-                                                Text("VIP", fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                                Text("VIP", fontSize = 8.5.sp, fontWeight = FontWeight.Bold)
                                             }
                                         }
                                     ) {
-                                        Icon(Icons.Default.CreditCard, contentDescription = "Abonnements")
+                                        Icon(
+                                            Icons.Default.CreditCard,
+                                            contentDescription = "Abonnements",
+                                            modifier = Modifier.size(24.dp)
+                                        )
                                     }
                                 },
-                                label = { Text("Forfaits", fontSize = 11.sp, fontWeight = if (currentScreen == "plans") FontWeight.Bold else FontWeight.Medium) },
+                                label = { Text("Forfaits", fontSize = 12.sp, fontWeight = if (currentScreen == "plans") FontWeight.Bold else FontWeight.Medium) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = BrandBluePrimary,
                                     selectedTextColor = BrandBluePrimary,
@@ -429,8 +534,14 @@ fun SmartOneMainApp() {
                             NavigationBarItem(
                                 selected = currentScreen == "deposit",
                                 onClick = { currentScreen = "deposit" },
-                                icon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Dépôt") },
-                                label = { Text("Dépôt", fontSize = 11.sp, fontWeight = if (currentScreen == "deposit") FontWeight.Bold else FontWeight.Medium) },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.AccountBalanceWallet,
+                                        contentDescription = "Dépôt",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
+                                label = { Text("Dépôt", fontSize = 12.sp, fontWeight = if (currentScreen == "deposit") FontWeight.Bold else FontWeight.Medium) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = BrandBluePrimary,
                                     selectedTextColor = BrandBluePrimary,
@@ -455,44 +566,21 @@ fun SmartOneMainApp() {
                                                 }
                                             }
                                         ) {
-                                            Icon(Icons.Default.Star, contentDescription = "Favoris")
+                                            Icon(
+                                                Icons.Default.Star,
+                                                contentDescription = "Favoris",
+                                                modifier = Modifier.size(24.dp)
+                                            )
                                         }
                                     } else {
-                                        Icon(Icons.Default.Star, contentDescription = "Favoris")
+                                        Icon(
+                                            Icons.Default.Star,
+                                            contentDescription = "Favoris",
+                                            modifier = Modifier.size(24.dp)
+                                        )
                                     }
                                 },
-                                label = { Text("Favoris", fontSize = 11.sp, fontWeight = if (currentScreen == "fav") FontWeight.Bold else FontWeight.Medium) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = BrandBluePrimary,
-                                    selectedTextColor = BrandBluePrimary,
-                                    indicatorColor = BrandBlueLight,
-                                    unselectedIconColor = LightTextMuted,
-                                    unselectedTextColor = LightTextMuted
-                                )
-                            )
-
-                            NavigationBarItem(
-                                selected = currentScreen == "menu",
-                                onClick = { currentScreen = "menu" },
-                                icon = {
-                                    if (notifications.isNotEmpty()) {
-                                        BadgedBox(
-                                            badge = {
-                                                Badge(
-                                                    containerColor = StatusRed,
-                                                    contentColor = Color.White
-                                                ) {
-                                                    Text("${notifications.size}", fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                                                }
-                                            }
-                                        ) {
-                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                        }
-                                    } else {
-                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                    }
-                                },
-                                label = { Text("Menu", fontSize = 11.sp, fontWeight = if (currentScreen == "menu") FontWeight.Bold else FontWeight.Medium) },
+                                label = { Text("Favoris", fontSize = 12.sp, fontWeight = if (currentScreen == "fav") FontWeight.Bold else FontWeight.Medium) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = BrandBluePrimary,
                                     selectedTextColor = BrandBluePrimary,
@@ -790,6 +878,7 @@ fun SmartOneMainApp() {
                 }
             }
         }
+    }
     }
 
     // Auth Dialog
