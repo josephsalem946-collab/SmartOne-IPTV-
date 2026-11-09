@@ -69,9 +69,9 @@ fun PlayerView(
         }
     }
 
-    // Auto-hide overlays after 30 seconds of inactivity
+    // Auto-hide overlays after 45 seconds of inactivity
     LaunchedEffect(lastPlayerInteractionTime) {
-        delay(30_000L) // 30 seconds
+        delay(45_000L) // 45 seconds of inactivity
         areOverlaysVisible = false
     }
 
@@ -478,98 +478,104 @@ fun PlayerView(
 
             // Player Action Controls Toolbar
             if (channel != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = areOverlaysVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut()
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Play/Pause button
-                        FilledIconButton(
-                            onClick = {
-                                lastPlayerInteractionTime = System.currentTimeMillis()
-                                areOverlaysVisible = true
-                                onTogglePlayPause()
-                            },
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = BrandBluePrimary,
-                                contentColor = Color.White
-                            ),
-                            modifier = Modifier
-                                .size(40.dp)
-                                .testTag("player_play_pause_button")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (isPlaying) "Pause" else "Lecture"
-                            )
+                            // Play/Pause button
+                            FilledIconButton(
+                                onClick = {
+                                    lastPlayerInteractionTime = System.currentTimeMillis()
+                                    areOverlaysVisible = true
+                                    onTogglePlayPause()
+                                },
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = BrandBluePrimary,
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .testTag("player_play_pause_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pause" else "Lecture"
+                                )
+                            }
+
+                            // Stop button (Bouton blanc avec icône Stop contrastée)
+                            FilledIconButton(
+                                onClick = {
+                                    lastPlayerInteractionTime = System.currentTimeMillis()
+                                    areOverlaysVisible = true
+                                    onStop()
+                                },
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = Color.White,
+                                    contentColor = Color(0xFF0F172A)
+                                ),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .testTag("player_stop_button")
+                            ) {
+                                Icon(imageVector = Icons.Default.Stop, contentDescription = "Arrêter")
+                            }
+
+                            // Favorite button
+                            IconButton(
+                                onClick = {
+                                    lastPlayerInteractionTime = System.currentTimeMillis()
+                                    areOverlaysVisible = true
+                                    onToggleFavorite()
+                                },
+                                modifier = Modifier.testTag("player_fav_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                    contentDescription = "Favori",
+                                    tint = if (isFavorite) BrandGold else DarkTextSecondary
+                                )
+                            }
                         }
 
-                        // Stop button (Bouton blanc avec icône Stop contrastée)
-                        FilledIconButton(
-                            onClick = {
-                                lastPlayerInteractionTime = System.currentTimeMillis()
-                                areOverlaysVisible = true
-                                onStop()
-                            },
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = Color.White,
-                                contentColor = Color(0xFF0F172A)
-                            ),
-                            modifier = Modifier
-                                .size(40.dp)
-                                .testTag("player_stop_button")
-                        ) {
-                            Icon(imageVector = Icons.Default.Stop, contentDescription = "Arrêter")
-                        }
-
-                        // Favorite button
-                        IconButton(
-                            onClick = {
-                                lastPlayerInteractionTime = System.currentTimeMillis()
-                                areOverlaysVisible = true
-                                onToggleFavorite()
-                            },
-                            modifier = Modifier.testTag("player_fav_button")
-                        ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                                contentDescription = "Favori",
-                                tint = if (isFavorite) BrandGold else DarkTextSecondary
-                            )
-                        }
-                    }
-
-                    if (!hasActiveSubscription) {
-                        Button(
-                            onClick = {
-                                lastPlayerInteractionTime = System.currentTimeMillis()
-                                areOverlaysVisible = true
-                                onOpenPlans()
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = BrandGoldDark),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.testTag("player_subscribe_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = Color.Black,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Illimité",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
+                        if (!hasActiveSubscription) {
+                            Button(
+                                onClick = {
+                                    lastPlayerInteractionTime = System.currentTimeMillis()
+                                    areOverlaysVisible = true
+                                    onOpenPlans()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = BrandGoldDark),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.testTag("player_subscribe_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Illimité",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
                 }

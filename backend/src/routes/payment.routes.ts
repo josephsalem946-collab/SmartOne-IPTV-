@@ -34,7 +34,7 @@ const webhookSchema = z.object({
 /**
  * POST /api/payment/moncash/create
  * Backend proxy initializing MonCash Online payment.
- * Merchant Phone (+50946877695) and API secrets remain hidden on server.
+ * Merchant credentials and API secrets remain hidden on server.
  */
 paymentRouter.post(
   "/moncash/create",
@@ -89,7 +89,7 @@ paymentRouter.post(
 /**
  * POST /api/payment/natcash/create
  * Backend proxy initializing Natcash Online payment.
- * Merchant Phone (+50932153281) and API secrets remain hidden on server.
+ * Merchant credentials and API secrets remain hidden on server.
  */
 paymentRouter.post(
   "/natcash/create",

@@ -30,7 +30,7 @@ object SmartOneRepository {
             minHtg = 250.0,
             maxHtg = 10000.0,
             type = "Mobile Money",
-            merchantMasked = "+509XXXXX281",
+            merchantMasked = "Passerelle Officielle",
             isBlocked = false
         ),
         PaymentGateway(
@@ -40,7 +40,7 @@ object SmartOneRepository {
             minHtg = 250.0,
             maxHtg = 10000.0,
             type = "Mobile Money",
-            merchantMasked = "+509XXXXX695",
+            merchantMasked = "Passerelle Officielle",
             isBlocked = false
         ),
         PaymentGateway(
@@ -233,7 +233,7 @@ object SmartOneRepository {
             id = "tps_1",
             payerId = "u1",
             payerName = "Marie Claire",
-            recipientIdentifier = "+509 3215 3281",
+            recipientIdentifier = "+509 3000 0000",
             planLabel = "3 Mois",
             amountHtg = 750.0,
             timestamp = "Hier à 16:30",
@@ -243,7 +243,7 @@ object SmartOneRepository {
             id = "tps_2",
             payerId = "u2",
             payerName = "Jean Paul",
-            recipientIdentifier = "josephsalem946@gmail.com",
+            recipientIdentifier = "supportdisponible@gmail.com",
             planLabel = "1 An",
             amountHtg = 2500.0,
             timestamp = "Aujourd'hui à 09:15",
@@ -267,7 +267,7 @@ object SmartOneRepository {
         UserComment("c1", "Jean-Baptiste Moïse", "+509 3782-9011", 5, "Service impeccable ! MonCash validé en moins de 10 secondes et les chaînes sportives ne coupent jamais.", "Il y a 15 min", "Abonné 1 An"),
         UserComment("c2", "Daphnée Saint-Louis", "+509 4621-0045", 5, "Très bonne qualité 1080p 60fps sur ma smart TV. Natcash fonctionne parfaitement.", "Il y a 45 min", "Abonné 6 Mois"),
         UserComment("c3", "Fritzner Pierre", "+509 3109-8874", 4, "L'interface est super rapide, les tirages et chaînes sont à l'heure. Très satisfait.", "Il y a 2h", "Client Vérifié"),
-        UserComment("c4", "Marie Yolande Casimir", "+509 4812-3390", 5, "Bravo à l'équipe de Joseph Salem ! Le support est très réactif et le paiement par carte passe direct.", "Il y a 3h", "Abonné 1 An"),
+        UserComment("c4", "Marie Yolande Casimir", "+509 4812-3390", 5, "Bravo à l'équipe de SmartOne ! Le support est très réactif et le paiement par carte passe direct.", "Il y a 3h", "Abonné 1 An"),
         UserComment("c5", "Rodolphe Étienne", "+509 3450-7122", 5, "Excellente sélection de chaînes françaises et américaines. Très fluide.", "Il y a 5h", "Abonné 3 Mois"),
         UserComment("c6", "Ketsia Paul", "+509 4118-2900", 4, "Recharge de solde instantanée. Le lecteur vidéo est stable et sans pub.", "Il y a 8h", "Client Vérifié"),
         UserComment("c7", "Claudy Dorce", "+509 3899-1234", 5, "Application au top, surtout les 4 boutons de paiement bien clairs et faciles.", "Il y a 12h", "Abonné 1 Mois"),
@@ -451,13 +451,24 @@ object SmartOneRepository {
         }
     }
 
+    fun sanitizeInput(text: String, maxLen: Int = 300): String {
+        return text.trim()
+            .take(maxLen)
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#x27;")
+    }
+
     fun addComment(author: String, comment: String, rating: Int = 5) {
+        val safeAuthor = sanitizeInput(author.ifBlank { "Client SmartOne" }, 50)
+        val safeComment = sanitizeInput(comment, 500)
         val newC = UserComment(
             id = "c_${System.currentTimeMillis()}",
-            author = author.ifBlank { "Client SmartOne" },
+            author = safeAuthor,
             phone = "+509 3${(100..999).random()}-${(1000..9999).random()}",
             rating = rating.coerceIn(1, 5),
-            content = comment,
+            content = safeComment,
             date = "À l'instant",
             badge = "Nouveau Commentaire"
         )
@@ -545,11 +556,13 @@ object SmartOneRepository {
         val dateFormat = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.FRENCH)
         val nowStr = dateFormat.format(Date())
 
+        val safeRecipient = sanitizeInput(recipientIdentifier, 80)
+        val safePayer = sanitizeInput(payerName, 60)
         val record = ThirdPartySubscription(
             id = "tps_${System.currentTimeMillis()}",
             payerId = _currentUser.value?.userId ?: "admin_direct",
-            payerName = payerName,
-            recipientIdentifier = recipientIdentifier.trim(),
+            payerName = safePayer,
+            recipientIdentifier = safeRecipient,
             planLabel = plan.label,
             amountHtg = cost,
             timestamp = nowStr,
@@ -622,14 +635,16 @@ object SmartOneRepository {
     fun sendNotification(title: String, message: String, type: String = "INFO"): Boolean {
         if (title.isBlank() || message.isBlank()) return false
         val dateFormat = SimpleDateFormat("dd MMM HH:mm", Locale.FRENCH)
+        val safeTitle = sanitizeInput(title, 80)
+        val safeMessage = sanitizeInput(message, 500)
         val newNotif = AppNotification(
             id = "notif_${System.currentTimeMillis()}",
-            title = title.trim(),
-            message = message.trim(),
+            title = safeTitle,
+            message = safeMessage,
             date = dateFormat.format(Date()),
             type = type,
             isRead = false,
-            sender = "Administrateur (josephsalem946@gmail.com)"
+            sender = "Administrateur (supportdisponible@gmail.com)"
         )
         _notifications.value = listOf(newNotif) + _notifications.value
         return true

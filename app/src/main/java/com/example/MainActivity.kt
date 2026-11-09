@@ -143,6 +143,26 @@ fun SmartOneMainApp() {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    // Automatically close drawer and dismiss dialogs when 45s inactivity triggers
+    LaunchedEffect(isUIVisible) {
+        if (!isUIVisible) {
+            if (drawerState.isOpen) {
+                coroutineScope.launch { drawerState.close() }
+            }
+            showAuthDialog = false
+            showProfileDialog = false
+            showSearchDialog = false
+            showAboutDialog = false
+            showDownloadDialog = false
+            showNotificationsDialog = false
+            showVideoSettingsDialog = false
+            showLanguageDialog = false
+            showFaqDialog = false
+            showPrivacyDialog = false
+            showFeedbackDialog = false
+        }
+    }
+
     // Back button handling: close drawer if open, or return to home screen if on sub-screen
     BackHandler(enabled = drawerState.isOpen || currentScreen != "home") {
         if (drawerState.isOpen) {
@@ -217,7 +237,8 @@ fun SmartOneMainApp() {
             )
         }
     ) {
-        Scaffold(
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
@@ -810,7 +831,8 @@ fun SmartOneMainApp() {
                         onDeleteNotification = { notifId ->
                             SmartOneRepository.deleteNotification(notifId)
                             Toast.makeText(context, "Notification supprimée avec succès", Toast.LENGTH_SHORT).show()
-                        }
+                        },
+                        onCloseAdmin = { currentScreen = "home" }
                     )
 
                     "menu" -> MenuScreen(
@@ -842,44 +864,30 @@ fun SmartOneMainApp() {
                     )
                 }
 
-                // Floating inaction wake indicator (Toucher pour réactiver)
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = !isUIVisible,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 18.dp)
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xDD0D1B2A),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, ColorBleuMaronBorder)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(BrandCyan)
-                            )
-                            Text(
-                                text = "Touchez l'écran pour réactiver",
-                                color = Color(0xFFE2E8F0),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
             }
         }
     }
+
+    // Fullscreen pure video player after 45 seconds of screen inactivity
+    // Displays strictly the video player without anything else inside it, until a new user interaction
+    androidx.compose.animation.AnimatedVisibility(
+        visible = !isUIVisible,
+        enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(400)),
+        exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(250))
+    ) {
+        PureVideoPlayerScreen(
+            channel = currentPlaying ?: channels.firstOrNull(),
+            isPlaying = isPlaying,
+            playerBrightness = playerBrightness,
+            playerContrast = playerContrast,
+            onUserReaction = {
+                lastInteractionTime = System.currentTimeMillis()
+                isUIVisible = true
+            }
+        )
     }
+}
+}
 
     // Auth Dialog
     if (showAuthDialog) {

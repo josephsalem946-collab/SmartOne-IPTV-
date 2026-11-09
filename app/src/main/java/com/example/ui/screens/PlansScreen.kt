@@ -221,7 +221,7 @@ fun PlansScreen(
                                     if (recipientError != null) recipientError = null
                                 },
                                 label = { Text("Email oswa Nimewo Telefòn (+509...)") },
-                                placeholder = { Text("+509 3215 3281 oswa kliyan@gmail.com", color = LightTextMuted) },
+                                placeholder = { Text("+509 3000 0000 oswa kliyan@gmail.com", color = LightTextMuted) },
                                 isError = recipientError != null,
                                 singleLine = true,
                                 modifier = Modifier

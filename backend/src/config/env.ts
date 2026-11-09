@@ -11,22 +11,22 @@ const envSchema = z.object({
   ALLOWED_ORIGINS: z.string().default("https://smartone-iptv.com,https://admin.smartone-iptv.com"),
   
   // Official Mobile Money Merchants (Haiti)
-  NATCASH_MERCHANT_PHONE: z.string().min(8).default("+50932153281"),
-  NATCASH_MERCHANT_ID: z.string().min(1),
-  NATCASH_API_SECRET: z.string().min(16),
+  NATCASH_MERCHANT_PHONE: z.string().min(8).default("+50900000000"),
+  NATCASH_MERCHANT_ID: z.string().min(1).default("natcash_merchant_default"),
+  NATCASH_API_SECRET: z.string().min(16).default("natcash_secret_placeholder_key_32chars"),
   
-  MONCASH_MERCHANT_PHONE: z.string().min(8).default("+50946877695"),
-  MONCASH_CLIENT_ID: z.string().min(1),
-  MONCASH_SECRET_KEY: z.string().min(16),
+  MONCASH_MERCHANT_PHONE: z.string().min(8).default("+50900000000"),
+  MONCASH_CLIENT_ID: z.string().min(1).default("moncash_client_id_default"),
+  MONCASH_SECRET_KEY: z.string().min(16).default("moncash_secret_placeholder_key_32chars"),
   
   // NOWPayments Official Crypto Gateway Credentials
-  NOWPAYMENTS_API_KEY: z.string().min(10).default("6EZ44P4-K52MBVT-QQ56MRX-WZWM8J5"),
-  NOWPAYMENTS_IPN_SECRET: z.string().min(10).default("hKiNfKED5A2JTxpwa1oR35Lp2XRzl9Ez"),
+  NOWPAYMENTS_API_KEY: z.string().min(10).default("nowpayments_api_key_placeholder"),
+  NOWPAYMENTS_IPN_SECRET: z.string().min(10).default("nowpayments_ipn_secret_placeholder"),
   NOWPAYMENTS_API_URL: z.string().url().default("https://api.nowpayments.io/v1"),
 
   // App2 (SmartOne IPTV) Dedicated Credentials
-  APP2_NOWPAYMENTS_API_KEY: z.string().default(process.env.APP2_NOWPAYMENTS_API_KEY || process.env.NOWPAYMENTS_API_KEY || "6EZ44P4-K52MBVT-QQ56MRX-WZWM8J5"),
-  APP2_NOWPAYMENTS_IPN_SECRET: z.string().default(process.env.APP2_NOWPAYMENTS_IPN_SECRET || process.env.NOWPAYMENTS_IPN_SECRET || "hKiNfKED5A2JTxpwa1oR35Lp2XRzl9Ez"),
+  APP2_NOWPAYMENTS_API_KEY: z.string().default(process.env.APP2_NOWPAYMENTS_API_KEY || process.env.NOWPAYMENTS_API_KEY || "nowpayments_api_key_placeholder"),
+  APP2_NOWPAYMENTS_IPN_SECRET: z.string().default(process.env.APP2_NOWPAYMENTS_IPN_SECRET || process.env.NOWPAYMENTS_IPN_SECRET || "nowpayments_ipn_secret_placeholder"),
   APP2_NOWPAYMENTS_BASE_URL: z.string().default(process.env.APP2_NOWPAYMENTS_BASE_URL || "https://api.nowpayments.io/v1"),
   APP2_BASE_URL: z.string().default(process.env.APP2_BASE_URL || "https://smartone-iptv.com"),
 

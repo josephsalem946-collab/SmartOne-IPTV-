@@ -37,6 +37,7 @@ import com.example.data.model.UserComment
 import com.example.data.repository.SmartOneRepository
 import com.example.ui.components.*
 import com.example.ui.theme.*
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 private data class AdminTabItem(
@@ -62,8 +63,28 @@ fun AdminDashboardScreen(
     onToggleClientPayForOthers: (String) -> Unit = {},
     onSendNotification: (String, String, String) -> Boolean = { _, _, _ -> true },
     onDeleteNotification: (String) -> Unit = {},
+    onCloseAdmin: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    var isAdminUnlocked by remember { mutableStateOf(false) }
+
+    // Session auto-lock after 5 minutes of inactivity / session duration
+    LaunchedEffect(isAdminUnlocked) {
+        if (isAdminUnlocked) {
+            delay(300_000L) // 5 minutes session expiry
+            isAdminUnlocked = false
+        }
+    }
+
+    if (!isAdminUnlocked) {
+        AdminSecurityChallenge(
+            onUnlockSuccess = { isAdminUnlocked = true },
+            onCancel = onCloseAdmin,
+            modifier = modifier
+        )
+        return
+    }
+
     // Secondary Navigation (Onglets)
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = remember {
@@ -171,35 +192,55 @@ fun AdminDashboardScreen(
                     )
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_smartone_emblem),
-                            contentDescription = "Emblème SmartOne IPTV",
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_smartone_emblem),
+                                contentDescription = "Emblème SmartOne IPTV",
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                            )
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                SmartOneTriColorText(fontSize = 15.sp, showIptvBadge = true)
-                                Spacer(modifier = Modifier.width(6.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    SmartOneTriColorText(fontSize = 15.sp, showIptvBadge = true)
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "• Admin",
+                                        color = DarkTextPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    )
+                                }
                                 Text(
-                                    text = "• Admin",
-                                    color = DarkTextPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
+                                    text = "Administrateur (supportdisponible@gmail.com)",
+                                    color = DarkTextSecondary,
+                                    fontSize = 11.sp
                                 )
                             }
-                            Text(
-                                text = "Joseph Salem (josephsalem946@gmail.com)",
-                                color = DarkTextSecondary,
-                                fontSize = 11.sp
-                            )
+                        }
+
+                        // Instant Lock button
+                        FilledTonalButton(
+                            onClick = { isAdminUnlocked = false },
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = BrandGold.copy(alpha = 0.2f),
+                                contentColor = BrandGold
+                            ),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.Lock, contentDescription = "Verrouiller", modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Verrouiller", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -734,7 +775,7 @@ fun AdminDashboardScreen(
                                     if (recipientInputError != null) recipientInputError = null
                                 },
                                 label = { Text("Email oubyen Nimewo Telefòn Kliyan an") },
-                                placeholder = { Text("Ex: +509 3215 3281 oswa marie.c@gmail.com", color = DarkTextMuted) },
+                                placeholder = { Text("Ex: +509 3000 0000 oswa kliyan@gmail.com", color = DarkTextMuted) },
                                 singleLine = true,
                                 isError = recipientInputError != null,
                                 modifier = Modifier

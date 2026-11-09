@@ -152,14 +152,14 @@ class ExampleUnitTest {
         assertNotNull(comments[0].author)
 
         // Add a new comment
-        SmartOneRepository.addComment("Testeur Joseph", "Superbe expérience!", 5)
+        SmartOneRepository.addComment("Testeur SmartOne", "Superbe expérience!", 5)
         val afterAdd = SmartOneRepository.recentComments.value
-        assertEquals("Testeur Joseph", afterAdd[0].author)
+        assertEquals("Testeur SmartOne", afterAdd[0].author)
 
         // Delete test comment
         SmartOneRepository.deleteComment(afterAdd[0].id)
         val afterDel = SmartOneRepository.recentComments.value
-        assertFalse(afterDel.any { it.author == "Testeur Joseph" })
+        assertFalse(afterDel.any { it.author == "Testeur SmartOne" })
     }
 
     @Test
