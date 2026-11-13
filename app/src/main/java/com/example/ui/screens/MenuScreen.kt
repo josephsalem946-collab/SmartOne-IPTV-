@@ -26,6 +26,7 @@ import com.example.data.model.UserAccount
 import com.example.data.repository.SmartOneRepository
 import com.example.ui.components.ColorARTRed
 import com.example.ui.components.SmartOneBrandLogo
+import com.example.ui.components.SmartOneFullBrandCard
 import com.example.ui.components.SmartOneLogoSize
 import com.example.ui.theme.*
 import java.util.Locale
@@ -58,6 +59,11 @@ fun MenuScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        // 0. Official SmartOne IPTV Full Brand Header
+        item {
+            SmartOneFullBrandCard(height = 110.dp)
+        }
+
         // 1. Profile / Account Card
         item {
             Card(
@@ -335,38 +341,42 @@ fun MenuScreen(
             }
         }
 
-        // 4. Administration Section
-        item {
-            Text(
-                text = "Gestion & Contrôle",
-                color = LightTextPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-            )
-        }
-
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = LightSurface),
-                border = CardDefaults.outlinedCardBorder().copy(
-                    brush = androidx.compose.ui.graphics.SolidColor(LightBorder)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                MenuItemRow(
-                    icon = Icons.Default.AdminPanelSettings,
-                    iconTint = ColorARTRed,
-                    title = "Panneau d'Administration",
-                    subtitle = "Clients, revenus, validation des paiements & sanctions",
-                    badge = "ADMIN",
-                    badgeColor = ColorARTRed,
-                    onClick = { onNavigate("admin") }
+        // 4. Administration Section (Visible ONLY to verified Admin accounts)
+        if (currentUser?.isAdmin == true) {
+            item {
+                Text(
+                    text = "Gestion & Contrôle",
+                    color = LightTextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
                 )
             }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = LightSurface),
+                    border = CardDefaults.outlinedCardBorder().copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(LightBorder)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    val isBlocked = com.example.data.repository.SmartOneRepository.isAdminPanelBlocked.value
+                    MenuItemRow(
+                        icon = if (isBlocked) Icons.Default.Lock else Icons.Default.AdminPanelSettings,
+                        iconTint = ColorARTRed,
+                        title = if (isBlocked) "Panneau d'Administration (Bloke)" else "Panneau d'Administration",
+                        subtitle = if (isBlocked) "Aksè a bloke pou rezon sekirite pa Pwopriyetè a" else "Clients, revenus, validation des paiements & sanctions",
+                        badge = if (isBlocked) "BLOKÉ" else "ADMIN",
+                        badgeColor = ColorARTRed,
+                        onClick = { onNavigate("admin") }
+                    )
+                }
+            }
         }
+
 
         // 5. Support & Legal Section
         item {

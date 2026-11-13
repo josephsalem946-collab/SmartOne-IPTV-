@@ -3,6 +3,8 @@ package com.example.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -97,22 +101,41 @@ fun AdminSecurityChallenge(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Security Shield Icon
-                Surface(
-                    shape = CircleShape,
-                    color = BrandCyan.copy(alpha = 0.15f),
-                    border = CardDefaults.outlinedCardBorder().copy(
-                        brush = Brush.radialGradient(listOf(BrandCyan, Color.Transparent))
-                    ),
-                    modifier = Modifier.size(68.dp)
+                // Official SmartOne IPTV Logo Emblem with Security Badge
+                Box(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    contentAlignment = Alignment.BottomEnd
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Security,
-                            contentDescription = "Sécurité Admin",
-                            tint = BrandCyan,
-                            modifier = Modifier.size(36.dp)
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.White,
+                        border = BorderStroke(2.dp, ColorONEGold),
+                        shadowElevation = 6.dp,
+                        modifier = Modifier.size(76.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = com.example.R.drawable.ic_smartone_emblem),
+                            contentDescription = "SmartOne IPTV Logo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
                         )
+                    }
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFF0F172A),
+                        border = BorderStroke(1.2.dp, BrandGold),
+                        modifier = Modifier
+                            .size(26.dp)
+                            .offset(x = 2.dp, y = 2.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = BrandGold,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
 

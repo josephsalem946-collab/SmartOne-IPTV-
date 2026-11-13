@@ -1,5 +1,6 @@
 package com.example.ui.dialogs
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -306,18 +309,18 @@ fun ProfileDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(CircleShape)
-                            .background(BrandBluePrimary.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        modifier = Modifier.size(52.dp),
+                        shape = CircleShape,
+                        color = Color.White,
+                        shadowElevation = 3.dp,
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, ColorONEGold)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = BrandCyan,
-                            modifier = Modifier.size(30.dp)
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_smartone_emblem),
+                            contentDescription = "SmartOne Logo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
                         )
                     }
 
@@ -520,18 +523,19 @@ fun ProfileDialog(
                 }
 
                 if (user?.role == "admin" || user?.email?.equals(SmartOneRepository.ADMIN_EMAIL, ignoreCase = true) == true) {
+                    val isBlocked = SmartOneRepository.isAdminPanelBlocked.value
                     OutlinedButton(
                         onClick = {
                             onDismiss()
                             onOpenAdmin()
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BrandCyan),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = if (isBlocked) StatusRed else BrandCyan),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.AdminPanelSettings, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(imageVector = if (isBlocked) Icons.Default.Lock else Icons.Default.AdminPanelSettings, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Ouvrir le Panneau Administrateur")
+                        Text(if (isBlocked) "Panneau Administrateur (Bloke)" else "Ouvrir le Panneau Administrateur")
                     }
                 }
 
@@ -706,7 +710,24 @@ fun SearchDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Rechercher une chaîne ou émission", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(28.dp),
+                    shape = CircleShape,
+                    color = Color.White,
+                    shadowElevation = 2.dp,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorONEGold)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_smartone_emblem),
+                        contentDescription = "SmartOne Logo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Rechercher une chaîne ou émission", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
         },
         text = {
             Column(
@@ -780,7 +801,24 @@ fun LanguageDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Choisir la langue d'affichage", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(28.dp),
+                    shape = CircleShape,
+                    color = Color.White,
+                    shadowElevation = 2.dp,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorONEGold)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_smartone_emblem),
+                        contentDescription = "SmartOne Logo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Choisir la langue d'affichage", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
         },
         text = {
             LazyColumn(
@@ -834,7 +872,24 @@ fun InfoContentDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(28.dp),
+                    shape = CircleShape,
+                    color = Color.White,
+                    shadowElevation = 2.dp,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorONEGold)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_smartone_emblem),
+                        contentDescription = "SmartOne Logo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
         },
         text = {
             content()
@@ -905,13 +960,20 @@ fun DownloadAppDialog(
                         modifier = Modifier.padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        androidx.compose.foundation.Image(
-                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
-                            contentDescription = "Emblème SmartOne IPTV",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                        )
+                        Surface(
+                            modifier = Modifier.size(54.dp),
+                            shape = CircleShape,
+                            color = Color.White,
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, ColorONEGold),
+                            shadowElevation = 3.dp
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
+                                contentDescription = "Emblème SmartOne IPTV",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                            )
+                        }
 
                         Spacer(modifier = Modifier.width(12.dp))
 

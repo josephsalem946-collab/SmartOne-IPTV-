@@ -109,7 +109,6 @@ fun FreeTimerBanner(
                     }
                 }
             } else {
-                val minutes = freeSecondsLeft / 60
                 val progress = (freeSecondsLeft / 3600f).coerceIn(0f, 1f)
 
                 Row(
@@ -117,39 +116,15 @@ fun FreeTimerBanner(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(if (minutes > 10) BrandCyan else StatusAmber)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Temps gratuit aujourd'hui :",
-                                color = LightTextSecondary,
-                                fontSize = 12.sp
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "$minutes min sur 60",
-                                color = if (minutes > 10) LightTextPrimary else StatusAmber,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        LinearProgressIndicator(
-                            progress = { progress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = if (minutes > 10) BrandBluePrimary else StatusAmber,
-                            trackColor = LightSurfaceVariant
-                        )
-                    }
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = BrandBluePrimary,
+                        trackColor = LightSurfaceVariant
+                    )
 
                     Spacer(modifier = Modifier.width(12.dp))
 

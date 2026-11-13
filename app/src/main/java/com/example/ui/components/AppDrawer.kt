@@ -55,6 +55,54 @@ fun AppDrawer(
                 .padding(vertical = 12.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
+            // 0. Official SmartOne IPTV Logo Brand Header in Drawer
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                    border = CardDefaults.outlinedCardBorder().copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(ColorONEGold.copy(alpha = 0.5f))
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(48.dp),
+                            shape = CircleShape,
+                            color = Color.White,
+                            border = androidx.compose.foundation.BorderStroke(1.5.dp, ColorONEGold),
+                            shadowElevation = 3.dp
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_smartone_emblem),
+                                contentDescription = "SmartOne Emblem",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column {
+                            SmartOneTriColorText(fontSize = 15.sp, showIptvBadge = true, containerPill = false)
+                            Text(
+                                text = "High-Quality Global Streaming",
+                                color = DarkTextSecondary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
             // Profile Card Header
             item {
                 Card(
@@ -277,21 +325,29 @@ fun AppDrawer(
                 )
             }
 
-            // Administration
-            item {
-                Text(
-                    text = "Administration",
-                    color = DarkTextMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                )
+            // Administration (Visible ONLY to verified Admin accounts)
+            if (currentUser?.isAdmin == true) {
+                val isBlocked = com.example.data.repository.SmartOneRepository.isAdminPanelBlocked.value
+                item {
+                    Text(
+                        text = if (isBlocked) "Administration (Bloke)" else "Administration",
+                        color = if (isBlocked) StatusRed else DarkTextMuted,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
 
-                DrawerNavItem("admin", "🛡️ Panneau Administrateur", Icons.Default.AdminPanelSettings, selectedNav == "admin") {
-                    onOpenAdmin()
+                    DrawerNavItem(
+                        "admin",
+                        if (isBlocked) "🔒 Panneau Admin (Bloke)" else "🛡️ Panneau Administrateur",
+                        if (isBlocked) Icons.Default.Lock else Icons.Default.AdminPanelSettings,
+                        selectedNav == "admin"
+                    ) {
+                        onOpenAdmin()
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
             // Support & Version Footer

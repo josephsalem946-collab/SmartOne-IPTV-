@@ -31,7 +31,12 @@ data class UserAccount(
     val isOnline: Boolean = true,
     val isVisitor: Boolean = false,
     val isVerified: Boolean = false
-)
+) {
+    val isAdmin: Boolean
+        get() = role.equals("admin", ignoreCase = true) ||
+                email.equals("supportdisponible@gmail.com", ignoreCase = true) ||
+                name.contains("Admin", ignoreCase = true)
+}
 
 data class ActiveSubscription(
     val subscriptionId: String,

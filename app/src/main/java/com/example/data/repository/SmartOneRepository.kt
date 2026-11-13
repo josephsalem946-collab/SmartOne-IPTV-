@@ -280,6 +280,14 @@ object SmartOneRepository {
     private val _selectedLanguage = MutableStateFlow("Français")
     val selectedLanguage: StateFlow<String> = _selectedLanguage.asStateFlow()
 
+    // Administrator Panel Security Lock State: Blocked by default ("bloke aksè Panneau Administrateur")
+    private val _isAdminPanelBlocked = MutableStateFlow(true)
+    val isAdminPanelBlocked: StateFlow<Boolean> = _isAdminPanelBlocked.asStateFlow()
+
+    fun setAdminPanelBlocked(blocked: Boolean) {
+        _isAdminPanelBlocked.value = blocked
+    }
+
     // Video display controls (Luminosité & Contraste du lecteur)
     private val _playerBrightness = MutableStateFlow(1.0f) // 0.5f to 1.5f (1.0 = 100%)
     val playerBrightness: StateFlow<Float> = _playerBrightness.asStateFlow()
@@ -425,6 +433,14 @@ object SmartOneRepository {
         )
         _transactions.value = listOf(newTx) + _transactions.value
         return true
+    }
+
+    fun deleteTransaction(transactionId: String) {
+        _transactions.value = _transactions.value.filter { it.transactionId != transactionId }
+    }
+
+    fun clearAllTransactions() {
+        _transactions.value = emptyList()
     }
 
     fun toggleClientSuspension(clientId: String) {

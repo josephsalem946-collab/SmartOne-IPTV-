@@ -459,12 +459,20 @@ fun PlayerView(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.Tv,
-                                contentDescription = null,
-                                tint = DarkTextMuted,
-                                modifier = Modifier.size(48.dp)
-                            )
+                            Surface(
+                                modifier = Modifier.size(64.dp),
+                                shape = CircleShape,
+                                color = Color.White,
+                                border = androidx.compose.foundation.BorderStroke(2.dp, ColorONEGold),
+                                shadowElevation = 4.dp
+                            ) {
+                                androidx.compose.foundation.Image(
+                                    painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_smartone_emblem),
+                                    contentDescription = "SmartOne Logo",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                                )
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Choisissez une chaîne pour commencer le streaming",

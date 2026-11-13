@@ -84,6 +84,7 @@ fun SmartOneMainApp() {
     val thirdPartySubscriptions by SmartOneRepository.thirdPartySubscriptions.collectAsStateWithLifecycle()
     val notifications by SmartOneRepository.notifications.collectAsStateWithLifecycle()
     val networkStatus by NetworkStatusMonitor.networkStatus.collectAsStateWithLifecycle()
+    val isAdminPanelBlocked by SmartOneRepository.isAdminPanelBlocked.collectAsStateWithLifecycle()
 
     // Initialize Network and Offline Cache
     LaunchedEffect(Unit) {
@@ -757,7 +758,15 @@ fun SmartOneMainApp() {
                     )
 
                     "history" -> HistoryScreen(
-                        transactions = transactions
+                        transactions = transactions,
+                        onDeleteTransaction = { txId ->
+                            SmartOneRepository.deleteTransaction(txId)
+                            Toast.makeText(context, "Tranzaksyon efase avèk siksè", Toast.LENGTH_SHORT).show()
+                        },
+                        onClearAllTransactions = {
+                            SmartOneRepository.clearAllTransactions()
+                            Toast.makeText(context, "Tout istorik la efase avèk siksè", Toast.LENGTH_SHORT).show()
+                        }
                     )
 
                     "fav" -> FavoritesScreen(
@@ -772,68 +781,90 @@ fun SmartOneMainApp() {
                         onToggleFavorite = { channelId -> SmartOneRepository.toggleFavorite(channelId) }
                     )
 
-                    "admin" -> AdminDashboardScreen(
-                        adminClients = adminClients,
-                        dailyRevenues = dailyRevenues,
-                        recentComments = recentComments,
-                        paymentGateways = paymentGateways,
-                        thirdPartySubscriptions = thirdPartySubscriptions,
-                        onUpdateDailyRevenue = { dayLabel, newAmount ->
-                            SmartOneRepository.updateDailyRevenue(dayLabel, newAmount)
-                            Toast.makeText(context, "Revenu de $dayLabel mis à jour : ${String.format(Locale.US, "%,.0f", newAmount)} HTG", Toast.LENGTH_SHORT).show()
-                        },
-                        onIncreaseDailyRevenue = { dayLabel, amountToAdd ->
-                            SmartOneRepository.increaseDailyRevenue(dayLabel, amountToAdd)
-                            Toast.makeText(context, "+${String.format(Locale.US, "%,.0f", amountToAdd)} HTG ajouté au revenu journalier", Toast.LENGTH_SHORT).show()
-                        },
-                        onDeleteComment = { commentId ->
-                            SmartOneRepository.deleteComment(commentId)
-                            Toast.makeText(context, "Commentaire supprimé", Toast.LENGTH_SHORT).show()
-                        },
-                        onToggleSanction = { clientId ->
-                            SmartOneRepository.toggleClientSuspension(clientId)
-                            Toast.makeText(context, "Statut du client mis à jour", Toast.LENGTH_SHORT).show()
-                        },
-                        onResetDevices = { clientId ->
-                            SmartOneRepository.resetConnectedDevicesForClient(clientId)
-                            Toast.makeText(context, "Sessions réinitialisées (2 appareils max)", Toast.LENGTH_SHORT).show()
-                        },
-                        onToggleGatewayStatus = { gatewayId ->
-                            SmartOneRepository.togglePaymentGatewayStatus(gatewayId)
-                            val isBlocked = SmartOneRepository.isGatewayBlocked(gatewayId)
-                            Toast.makeText(
-                                context,
-                                if (isBlocked) "Passerelle bloquée avec succès" else "Passerelle débloquée avec succès",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        onPayForClient = { recipient, plan ->
-                            SmartOneRepository.paySubscriptionForThirdParty(
-                                recipientIdentifier = recipient,
-                                plan = plan,
-                                payerName = "Administrateur (Direct)",
-                                deductFromBalance = false
+                    "admin" -> {
+                        if (isAdminPanelBlocked) {
+                            AdminBlockedScreen(
+                                onClose = { currentScreen = "home" },
+                                onUnblock = { secretCode ->
+                                    if (secretCode == "7492" || secretCode == "0000") {
+                                        SmartOneRepository.setAdminPanelBlocked(false)
+                                        Toast.makeText(context, "Panneau Administrateur debloke avèk siksè !", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Kòd sekirite enkòrèk", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             )
-                            Toast.makeText(context, "Abònman ${plan.label} aktive pou $recipient avèk siksè !", Toast.LENGTH_LONG).show()
-                        },
-                        onToggleClientPayForOthers = { clientId ->
-                            SmartOneRepository.toggleClientPayForOthers(clientId)
-                            Toast.makeText(context, "Aksè peye pou lòt kliyan modifye avèk siksè", Toast.LENGTH_SHORT).show()
-                        },
-                        notifications = notifications,
-                        onSendNotification = { title, message, type ->
-                            val sent = SmartOneRepository.sendNotification(title, message, type)
-                            if (sent) {
-                                Toast.makeText(context, "Notification diffusée à tous les clients !", Toast.LENGTH_SHORT).show()
-                            }
-                            sent
-                        },
-                        onDeleteNotification = { notifId ->
-                            SmartOneRepository.deleteNotification(notifId)
-                            Toast.makeText(context, "Notification supprimée avec succès", Toast.LENGTH_SHORT).show()
-                        },
-                        onCloseAdmin = { currentScreen = "home" }
-                    )
+                        } else {
+                            AdminDashboardScreen(
+                                adminClients = adminClients,
+                                dailyRevenues = dailyRevenues,
+                                recentComments = recentComments,
+                                paymentGateways = paymentGateways,
+                                thirdPartySubscriptions = thirdPartySubscriptions,
+                                onUpdateDailyRevenue = { dayLabel, newAmount ->
+                                    SmartOneRepository.updateDailyRevenue(dayLabel, newAmount)
+                                    Toast.makeText(context, "Revenu de $dayLabel mis à jour : ${String.format(Locale.US, "%,.0f", newAmount)} HTG", Toast.LENGTH_SHORT).show()
+                                },
+                                onIncreaseDailyRevenue = { dayLabel, amountToAdd ->
+                                    SmartOneRepository.increaseDailyRevenue(dayLabel, amountToAdd)
+                                    Toast.makeText(context, "+${String.format(Locale.US, "%,.0f", amountToAdd)} HTG ajouté au revenu journalier", Toast.LENGTH_SHORT).show()
+                                },
+                                onDeleteComment = { commentId ->
+                                    SmartOneRepository.deleteComment(commentId)
+                                    Toast.makeText(context, "Commentaire supprimé", Toast.LENGTH_SHORT).show()
+                                },
+                                onToggleSanction = { clientId ->
+                                    SmartOneRepository.toggleClientSuspension(clientId)
+                                    Toast.makeText(context, "Statut du client mis à jour", Toast.LENGTH_SHORT).show()
+                                },
+                                onResetDevices = { clientId ->
+                                    SmartOneRepository.resetConnectedDevicesForClient(clientId)
+                                    Toast.makeText(context, "Sessions réinitialisées (2 appareils max)", Toast.LENGTH_SHORT).show()
+                                },
+                                onToggleGatewayStatus = { gatewayId ->
+                                    SmartOneRepository.togglePaymentGatewayStatus(gatewayId)
+                                    val isBlocked = SmartOneRepository.isGatewayBlocked(gatewayId)
+                                    Toast.makeText(
+                                        context,
+                                        if (isBlocked) "Passerelle bloquée avec succès" else "Passerelle débloquée avec succès",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onPayForClient = { recipient, plan ->
+                                    SmartOneRepository.paySubscriptionForThirdParty(
+                                        recipientIdentifier = recipient,
+                                        plan = plan,
+                                        payerName = "Administrateur (Direct)",
+                                        deductFromBalance = false
+                                    )
+                                    Toast.makeText(context, "Abònman ${plan.label} aktive pou $recipient avèk siksè !", Toast.LENGTH_LONG).show()
+                                },
+                                onToggleClientPayForOthers = { clientId ->
+                                    SmartOneRepository.toggleClientPayForOthers(clientId)
+                                    Toast.makeText(context, "Aksè peye pou lòt kliyan modifye avèk siksè", Toast.LENGTH_SHORT).show()
+                                },
+                                notifications = notifications,
+                                onSendNotification = { title, message, type ->
+                                    val sent = SmartOneRepository.sendNotification(title, message, type)
+                                    if (sent) {
+                                        Toast.makeText(context, "Notification diffusée à tous les clients !", Toast.LENGTH_SHORT).show()
+                                    }
+                                    sent
+                                },
+                                onDeleteNotification = { notifId ->
+                                    SmartOneRepository.deleteNotification(notifId)
+                                    Toast.makeText(context, "Notification supprimée avec succès", Toast.LENGTH_SHORT).show()
+                                },
+                                onCloseAdmin = { currentScreen = "home" },
+                                onLockAndBlock = {
+                                    SmartOneRepository.setAdminPanelBlocked(true)
+                                    currentScreen = "home"
+                                    Toast.makeText(context, "Aksè Panneau Administrateur a bloke avèk siksè !", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }
+                    }
+
 
                     "menu" -> MenuScreen(
                         currentUser = currentUser,
@@ -974,14 +1005,35 @@ fun SmartOneMainApp() {
         InfoContentDialog(
             title = "À propos de SmartOne IPTV",
             content = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier.size(72.dp),
+                        shape = CircleShape,
+                        color = Color.White,
+                        border = androidx.compose.foundation.BorderStroke(2.dp, ColorONEGold),
+                        shadowElevation = 5.dp
+                    ) {
+                        androidx.compose.foundation.Image(
+                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_smartone_emblem),
+                            contentDescription = "Logo SmartOne IPTV",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                        )
+                    }
+
+                    SmartOneTriColorText(fontSize = 17.sp, showIptvBadge = true)
+
                     Text(
                         text = "SmartOne IPTV propose une expérience de streaming global haute définition avec accès aux flux d'actualités, de sport, de cinéma et de divertissement mondial.",
                         color = DarkTextPrimary,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Version : 23.0 (Build 23)", color = DarkTextSecondary, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(text = "Version : v29.0 (Build 29) • Officielle", color = BrandCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Text(text = "Éditeur : SmartOne Global Media & Administration", color = DarkTextSecondary, fontSize = 12.sp)
                     Text(text = "Support Disponible : ${SmartOneRepository.SUPPORT_EMAIL}", color = BrandGold, fontSize = 12.sp)
                 }

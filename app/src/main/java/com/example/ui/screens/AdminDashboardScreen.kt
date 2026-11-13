@@ -64,6 +64,7 @@ fun AdminDashboardScreen(
     onSendNotification: (String, String, String) -> Boolean = { _, _, _ -> true },
     onDeleteNotification: (String) -> Unit = {},
     onCloseAdmin: () -> Unit = {},
+    onLockAndBlock: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isAdminUnlocked by remember { mutableStateOf(false) }
@@ -228,19 +229,36 @@ fun AdminDashboardScreen(
                             }
                         }
 
-                        // Instant Lock button
-                        FilledTonalButton(
-                            onClick = { isAdminUnlocked = false },
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = BrandGold.copy(alpha = 0.2f),
-                                contentColor = BrandGold
-                            ),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Icon(Icons.Default.Lock, contentDescription = "Verrouiller", modifier = Modifier.size(15.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Verrouiller", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            // Instant Lock button (Session)
+                            FilledTonalButton(
+                                onClick = { isAdminUnlocked = false },
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = BrandGold.copy(alpha = 0.2f),
+                                    contentColor = BrandGold
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Default.Lock, contentDescription = "Verrouiller", modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Verrouiller", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+
+                            // Full Block Button (Aksè Bloke)
+                            Button(
+                                onClick = onLockAndBlock,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = StatusRed,
+                                    contentColor = Color.White
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Default.Shield, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Bloke Aksè", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
